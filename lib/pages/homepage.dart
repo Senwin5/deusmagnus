@@ -192,7 +192,7 @@ class _HomepageState extends State<Homepage> {
                   child: Image.asset(
                     "assets/images/deusmagnus.png",
                     height: 120,
-                    width: 120,
+                    width: 220,
                     fit: BoxFit.fill,
                   ),
                 ),
@@ -227,23 +227,7 @@ class _HomepageState extends State<Homepage> {
                             borderRadius: BorderRadius.circular(5),
                           ),
                           child: const Text(
-                            "₦2500/Hour",
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 16.0,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 20.0),
-                        Container(
-                          padding: const EdgeInsets.all(5),
-                          decoration: BoxDecoration(
-                            color: Color(0xff284a79),
-                            borderRadius: BorderRadius.circular(5),
-                          ),
-                          child: const Text(
-                            "Book Now",
+                            "View",
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 16.0,
