@@ -1,3 +1,4 @@
+import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:deusmagnus/pages/homepage.dart';
 import 'package:deusmagnus/pages/profile_page.dart';
 import 'package:deusmagnus/pages/projects.dart';
@@ -12,8 +13,6 @@ class BottomNav extends StatefulWidget {
 }
 
 class _BottomNavState extends State<BottomNav> {
-  //Creating a bottom navigation display list for bottom navigation bar
-
   late List<Widget> pages;
 
   late Homepage homepage;
@@ -22,8 +21,6 @@ class _BottomNavState extends State<BottomNav> {
   late ProfilePage profilePage;
 
   int currentTabIndex = 0;
-
-  //After the int currentTabIndex = 0, you will have to create initstate
 
   @override
   void initState() {
@@ -37,6 +34,28 @@ class _BottomNavState extends State<BottomNav> {
 
   @override
   Widget build(BuildContext context) {
-    return Container();
+    return Scaffold(
+      body: pages[currentTabIndex],
+      bottomNavigationBar: CurvedNavigationBar(
+        index: currentTabIndex,
+        height: 60.0,
+        backgroundColor: Colors.transparent,
+        color: Colors.blue,
+        buttonBackgroundColor: Colors.blueAccent,
+        animationCurve: Curves.easeInOut,
+        animationDuration: const Duration(milliseconds: 120),
+        items: const <Widget>[
+          Icon(Icons.home, size: 25, color: Colors.white),
+          Icon(Icons.apartment, size: 25, color: Colors.white),
+          Icon(Icons.business_center, size: 25, color: Colors.white),
+          Icon(Icons.person, size: 25, color: Colors.white),
+        ],
+        onTap: (int index) {
+          setState(() {
+            currentTabIndex = index;
+          });
+        },
+      ),
+    );
   }
 }
