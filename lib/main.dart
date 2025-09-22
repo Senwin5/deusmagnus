@@ -1,3 +1,4 @@
+import 'package:deusmagnus/pages/bottom_nav/bottom_nav.dart';
 import 'package:deusmagnus/pages/homepage.dart';
 import 'package:flutter/material.dart';
 
@@ -17,7 +18,8 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
-      home: Homepage(),
+      //home: Homepage(),
+      home:BottomNav(),
     );
   }
 }
