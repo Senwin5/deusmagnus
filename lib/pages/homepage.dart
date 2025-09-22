@@ -37,7 +37,7 @@ class _HomepageState extends State<Homepage> {
       appBar: AppBar(
         title: const Text("DeusMagnus", style: TextStyle(color: Colors.white)),
         backgroundColor: Colors.blue,
-        elevation: 0,
+        elevation: 4,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),

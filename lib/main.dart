@@ -1,5 +1,6 @@
 import 'package:deusmagnus/pages/bottom_nav/bottom_nav.dart';
 import 'package:deusmagnus/pages/homepage.dart';
+import 'package:deusmagnus/registration/login.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -19,7 +20,8 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
       //home: Homepage(),
-      home:BottomNav(),
+      //home:BottomNav(),
+      home:LoginPage(),
     );
   }
 }
