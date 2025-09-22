@@ -1,4 +1,3 @@
-import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:deusmagnus/pages/homepage.dart';
 import 'package:deusmagnus/pages/profile_page.dart';
 import 'package:deusmagnus/pages/projects.dart';
@@ -36,25 +35,32 @@ class _BottomNavState extends State<BottomNav> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: pages[currentTabIndex],
-      bottomNavigationBar: CurvedNavigationBar(
-        index: currentTabIndex,
-        height: 60.0,
-        backgroundColor: Colors.transparent,
-        color: Colors.blue,
-        buttonBackgroundColor: Colors.blueAccent,
-        animationCurve: Curves.easeInOut,
-        animationDuration: const Duration(milliseconds: 120),
-        items: const <Widget>[
-          Icon(Icons.home, size: 25, color: Colors.white),
-          Icon(Icons.apartment, size: 25, color: Colors.white),
-          Icon(Icons.business_center, size: 25, color: Colors.white),
-          Icon(Icons.person, size: 25, color: Colors.white),
-        ],
-        onTap: (int index) {
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: currentTabIndex,
+        type: BottomNavigationBarType.fixed,
+        backgroundColor: Colors.white,
+        selectedItemColor: Colors.blueAccent,
+        unselectedItemColor: Colors.grey[600],
+        elevation: 10,
+        selectedFontSize: 12,
+        unselectedFontSize: 12,
+        onTap: (index) {
           setState(() {
             currentTabIndex = index;
           });
         },
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.apartment),
+            label: "Properties",
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.business_center),
+            label: "Projects",
+          ),
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profile"),
+        ],
       ),
     );
   }
