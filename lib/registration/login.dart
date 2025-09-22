@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:deusmagnus/pages/bottom_nav/bottom_nav.dart';
-import 'package:deusmagnus/pages/homepage.dart';
 import 'signup_page.dart';
 
 class LoginPage extends StatefulWidget {
@@ -33,6 +32,7 @@ class _LoginPageState extends State<LoginPage> {
     String? storedPassword = prefs.getString("password");
 
     if (storedEmail == null || storedPassword == null) {
+      // ignore: use_build_context_synchronously
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("No account found, please sign up first")),
       );
@@ -40,6 +40,7 @@ class _LoginPageState extends State<LoginPage> {
     }
 
     if (email != storedEmail || password != storedPassword) {
+      // ignore: use_build_context_synchronously
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Incorrect email or password")),
       );
@@ -47,10 +48,8 @@ class _LoginPageState extends State<LoginPage> {
     }
 
     // Navigate to home (BottomNav)
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (_) => const BottomNav()),
-    );
+    // ignore: use_build_context_synchronously
+    Navigator.pushReplacement(context,MaterialPageRoute(builder: (_) => const BottomNav()), );
   }
 
   @override

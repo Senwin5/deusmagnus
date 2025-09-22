@@ -44,12 +44,14 @@ class _SignUpPageState extends State<SignUpPage> {
     await prefs.setString("email", email);
     await prefs.setString("password", password);
 
+    // ignore: use_build_context_synchronously
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text("Sign up successful! Please login.")),
     );
 
     // Navigate to login page
     Navigator.pushReplacement(
+      // ignore: use_build_context_synchronously
       context,
       MaterialPageRoute(builder: (_) => const LoginPage()),
     );
