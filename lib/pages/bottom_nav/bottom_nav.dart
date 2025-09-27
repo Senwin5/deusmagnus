@@ -11,7 +11,8 @@ class BottomNav extends StatefulWidget {
   State<BottomNav> createState() => _BottomNavState();
 }
 
-class _BottomNavState extends State<BottomNav> {
+class _BottomNavState extends State<BottomNav> { 
+  
   late List<Widget> pages;
 
   late Homepage homepage;

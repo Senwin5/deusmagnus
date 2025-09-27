@@ -18,6 +18,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
       //home: Homepage(),
+
       //home:BottomNav(),
       home:LoginPage(),
     );
