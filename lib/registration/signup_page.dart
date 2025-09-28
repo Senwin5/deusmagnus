@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'login.dart';
 
 class SignUpPage extends StatefulWidget {
@@ -13,10 +14,12 @@ class _SignUpPageState extends State<SignUpPage> {
   final TextEditingController nameController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-  final TextEditingController confirmPasswordController = TextEditingController();
+  final TextEditingController confirmPasswordController =
+      TextEditingController();
 
   bool isPasswordVisible = false;
   bool isConfirmPasswordVisible = false;
+  bool isLoading = false;
 
   Future<void> _signUp() async {
     String name = nameController.text.trim();
@@ -24,7 +27,10 @@ class _SignUpPageState extends State<SignUpPage> {
     String password = passwordController.text.trim();
     String confirmPassword = confirmPasswordController.text.trim();
 
-    if (name.isEmpty || email.isEmpty || password.isEmpty || confirmPassword.isEmpty) {
+    if (name.isEmpty ||
+        email.isEmpty ||
+        password.isEmpty ||
+        confirmPassword.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Please fill all fields")),
       );
@@ -38,23 +44,51 @@ class _SignUpPageState extends State<SignUpPage> {
       return;
     }
 
-    // Save credentials using shared_preferences
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setString("name", name);
-    await prefs.setString("email", email);
-    await prefs.setString("password", password);
+    setState(() => isLoading = true);
 
-    // ignore: use_build_context_synchronously
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Sign up successful! Please login.")),
-    );
+    try {
+      // ✅ Create user in Firebase
+      UserCredential userCredential = await FirebaseAuth.instance
+          .createUserWithEmailAndPassword(email: email, password: password);
 
-    // Navigate to login page
-    Navigator.pushReplacement(
+      String uid = userCredential.user!.uid;
+
+      // ✅ Save extra user details in Firestore
+      await FirebaseFirestore.instance.collection("users").doc(uid).set({
+        "fullName": name,
+        "email": email,
+        "createdAt": FieldValue.serverTimestamp(),
+        "role": "user",
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Sign up successful! Please login.")),
+      );
+
+      // Navigate to login page
       // ignore: use_build_context_synchronously
-      context,
-      MaterialPageRoute(builder: (_) => const LoginPage()),
-    );
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const LoginPage()),
+      );
+    } on FirebaseAuthException catch (e) {
+      String errorMsg;
+      if (e.code == 'weak-password') {
+        errorMsg = "The password provided is too weak.";
+      } else if (e.code == 'email-already-in-use') {
+        errorMsg = "The account already exists for that email.";
+      } else if (e.code == 'invalid-email') {
+        errorMsg = "The email address is badly formatted.";
+      } else {
+        errorMsg = e.message ?? "An error occurred.";
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(errorMsg)),
+      );
+    } finally {
+      setState(() => isLoading = false);
+    }
   }
 
   @override
@@ -79,7 +113,10 @@ class _SignUpPageState extends State<SignUpPage> {
               const SizedBox(height: 20),
               const Text(
                 "Create Account",
-                style: TextStyle(fontSize: 32, color: Colors.white, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                    fontSize: 32,
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 10),
               const Text(
@@ -94,9 +131,12 @@ class _SignUpPageState extends State<SignUpPage> {
                 decoration: InputDecoration(
                   filled: true,
                   fillColor: Colors.white,
-                  prefixIcon: const Icon(Icons.person, color: Color(0xff284a79)),
+                  prefixIcon:
+                      const Icon(Icons.person, color: Color(0xff284a79)),
                   hintText: "Full Name",
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: BorderSide.none),
                 ),
               ),
               const SizedBox(height: 20),
@@ -109,7 +149,9 @@ class _SignUpPageState extends State<SignUpPage> {
                   fillColor: Colors.white,
                   prefixIcon: const Icon(Icons.email, color: Color(0xff284a79)),
                   hintText: "Email",
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: BorderSide.none),
                 ),
               ),
               const SizedBox(height: 20),
@@ -122,10 +164,17 @@ class _SignUpPageState extends State<SignUpPage> {
                   fillColor: Colors.white,
                   prefixIcon: const Icon(Icons.lock, color: Color(0xff284a79)),
                   hintText: "Password",
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: BorderSide.none),
                   suffixIcon: IconButton(
-                    icon: Icon(isPasswordVisible ? Icons.visibility : Icons.visibility_off, color: const Color(0xff284a79)),
-                    onPressed: () => setState(() => isPasswordVisible = !isPasswordVisible),
+                    icon: Icon(
+                        isPasswordVisible
+                            ? Icons.visibility
+                            : Icons.visibility_off,
+                        color: const Color(0xff284a79)),
+                    onPressed: () =>
+                        setState(() => isPasswordVisible = !isPasswordVisible),
                   ),
                 ),
               ),
@@ -139,10 +188,17 @@ class _SignUpPageState extends State<SignUpPage> {
                   fillColor: Colors.white,
                   prefixIcon: const Icon(Icons.lock, color: Color(0xff284a79)),
                   hintText: "Confirm Password",
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: BorderSide.none),
                   suffixIcon: IconButton(
-                    icon: Icon(isConfirmPasswordVisible ? Icons.visibility : Icons.visibility_off, color: const Color(0xff284a79)),
-                    onPressed: () => setState(() => isConfirmPasswordVisible = !isConfirmPasswordVisible),
+                    icon: Icon(
+                        isConfirmPasswordVisible
+                            ? Icons.visibility
+                            : Icons.visibility_off,
+                        color: const Color(0xff284a79)),
+                    onPressed: () => setState(() =>
+                        isConfirmPasswordVisible = !isConfirmPasswordVisible),
                   ),
                 ),
               ),
@@ -151,23 +207,33 @@ class _SignUpPageState extends State<SignUpPage> {
                 width: double.infinity,
                 height: 55,
                 child: ElevatedButton(
-                  onPressed: _signUp,
+                  onPressed: isLoading ? null : _signUp,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.white,
                     foregroundColor: const Color(0xff284a79),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16)),
                   ),
-                  child: const Text("Sign Up", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  child: isLoading
+                      ? const CircularProgressIndicator(
+                          color: Color(0xff284a79))
+                      : const Text("Sign Up",
+                          style: TextStyle(
+                              fontSize: 18, fontWeight: FontWeight.bold)),
                 ),
               ),
               const SizedBox(height: 20),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text("Already have an account? ", style: TextStyle(color: Colors.white70)),
+                  const Text("Already have an account? ",
+                      style: TextStyle(color: Colors.white70)),
                   GestureDetector(
-                    onTap: () => Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const LoginPage())),
-                    child: const Text("Login", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                    onTap: () => Navigator.pushReplacement(context,
+                        MaterialPageRoute(builder: (_) => const LoginPage())),
+                    child: const Text("Login",
+                        style: TextStyle(
+                            color: Colors.white, fontWeight: FontWeight.bold)),
                   ),
                 ],
               ),

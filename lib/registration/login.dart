@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:deusmagnus/pages/bottom_nav/bottom_nav.dart';
 import 'signup_page.dart';
 
@@ -15,40 +15,61 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController passwordController = TextEditingController();
 
   bool isPasswordVisible = false;
+  bool isLoading = false;
 
   Future<void> _login() async {
     String email = emailController.text.trim();
     String password = passwordController.text.trim();
 
     if (email.isEmpty || password.isEmpty) {
-      ScaffoldMessenger.of(
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Please fill all fields")),
+      );
+      return;
+    }
+
+    setState(() => isLoading = true);
+
+    try {
+      await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          backgroundColor: Colors.green,
+          content: Text("Welcome back!"),
+        ),
+      );
+
+      Navigator.pushReplacement(
         context,
-      ).showSnackBar(const SnackBar(content: Text("Please fill all fields")));
-      return;
-    }
-
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? storedEmail = prefs.getString("email");
-    String? storedPassword = prefs.getString("password");
-
-    if (storedEmail == null || storedPassword == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("No account found, please sign up first")),
+        MaterialPageRoute(builder: (_) => const BottomNav()),
       );
-      return;
-    }
+    } on FirebaseAuthException catch (e) {
+      String message = "Login failed";
+      if (e.code == "user-not-found") {
+        message = "No user found for this email";
+      } else if (e.code == "wrong-password") {
+        message = "Incorrect password";
+      } else if (e.code == "invalid-email") {
+        message = "Invalid email format";
+      }
 
-    if (email != storedEmail || password != storedPassword) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Incorrect email or password")),
+        SnackBar(backgroundColor: Colors.red, content: Text(message)),
       );
-      return;
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: Colors.red,
+          content: Text("Error: $e"),
+        ),
+      );
+    } finally {
+      setState(() => isLoading = false);
     }
-
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (_) => const BottomNav()),
-    );
   }
 
   @override
@@ -69,7 +90,6 @@ class _LoginPageState extends State<LoginPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // Updated image section to stretch full width
               SizedBox(
                 width: double.infinity,
                 child: Image.asset(
@@ -138,9 +158,10 @@ class _LoginPageState extends State<LoginPage> {
                 alignment: Alignment.centerRight,
                 child: TextButton(
                   onPressed: () {
+                    // TODO: Add Firebase password reset
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
-                        content: Text("Forgot password not implemented yet"),
+                        content: Text("Forgot password coming soon"),
                       ),
                     );
                   },
@@ -158,7 +179,7 @@ class _LoginPageState extends State<LoginPage> {
                 width: double.infinity,
                 height: 55,
                 child: ElevatedButton(
-                  onPressed: _login,
+                  onPressed: isLoading ? null : _login,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.white,
                     foregroundColor: const Color(0xff284a79),
@@ -166,10 +187,16 @@ class _LoginPageState extends State<LoginPage> {
                       borderRadius: BorderRadius.circular(16),
                     ),
                   ),
-                  child: const Text(
-                    "Login",
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
+                  child: isLoading
+                      ? const CircularProgressIndicator(
+                          valueColor:
+                              AlwaysStoppedAnimation<Color>(Color(0xff284a79)),
+                        )
+                      : const Text(
+                          "Login",
+                          style: TextStyle(
+                              fontSize: 18, fontWeight: FontWeight.bold),
+                        ),
                 ),
               ),
               const SizedBox(height: 34),

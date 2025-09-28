@@ -90,6 +90,7 @@ class _HomepageState extends State<Homepage> {
               style: TextStyle(color: Colors.black87),
             ),
             const SizedBox(height: 20.0),
+
             // 🏗 Ongoing projects
             const Text(
               "Ongoing Projects",
@@ -122,16 +123,16 @@ class _HomepageState extends State<Homepage> {
             ),
             const SizedBox(height: 20),
 
-            // 🌟 Featured
+            // 🌟 Favourite
             const Text(
               "Favourite Projects",
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 20.0),
 
-            // ⚡ Quick actions (✅ removed duplicates)
+            // ⚡ Quick actions
             SizedBox(
-              height: 95, // adjust height to fit your cards
+              height: 95,
               child: SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 child: Row(
@@ -260,7 +261,6 @@ class _HomepageState extends State<Homepage> {
         width: 100,
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          // ignore: deprecated_member_use
           color: color.withOpacity(0.1),
           borderRadius: BorderRadius.circular(16),
         ),
@@ -328,8 +328,8 @@ class _HomepageState extends State<Homepage> {
                     color: status == "Ongoing"
                         ? Colors.blue
                         : status == "Planned"
-                        ? Colors.orange
-                        : Colors.green,
+                            ? Colors.orange
+                            : Colors.green,
                     fontWeight: FontWeight.w500,
                   ),
                 ),

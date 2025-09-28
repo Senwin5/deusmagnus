@@ -1,12 +1,15 @@
 import 'package:deusmagnus/registration/login.dart';
 import 'package:flutter/material.dart';
 // ignore: depend_on_referenced_packages
-import 'package:firebase_core/firebase_core.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
   runApp(const MyApp());
+}
+
+class Firebase {
+  static Future<void> initializeApp() async {}
 }
 
 class MyApp extends StatelessWidget {
