@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "788166261167",
+    "project_id": "deusmagnus-d401d",
+    "storage_bucket": "deusmagnus-d401d.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:788166261167:android:66ba9a99943fa523a6175a",
+        "android_client_info": {
+          "package_name": "com.deusmagnus.deusmagnus"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA24uA5cQ9hERNDLgKL7NQowKDzWkBXImo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

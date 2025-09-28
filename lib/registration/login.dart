@@ -21,9 +21,9 @@ class _LoginPageState extends State<LoginPage> {
     String password = passwordController.text.trim();
 
     if (email.isEmpty || password.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Please fill all fields")),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("Please fill all fields")));
       return;
     }
 
@@ -32,7 +32,6 @@ class _LoginPageState extends State<LoginPage> {
     String? storedPassword = prefs.getString("password");
 
     if (storedEmail == null || storedPassword == null) {
-      // ignore: use_build_context_synchronously
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("No account found, please sign up first")),
       );
@@ -40,16 +39,16 @@ class _LoginPageState extends State<LoginPage> {
     }
 
     if (email != storedEmail || password != storedPassword) {
-      // ignore: use_build_context_synchronously
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Incorrect email or password")),
       );
       return;
     }
 
-    // Navigate to home (BottomNav)
-    // ignore: use_build_context_synchronously
-    Navigator.pushReplacement(context,MaterialPageRoute(builder: (_) => const BottomNav()), );
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (_) => const BottomNav()),
+    );
   }
 
   @override
@@ -66,17 +65,29 @@ class _LoginPageState extends State<LoginPage> {
           ),
         ),
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 80),
+          padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 50),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Image.asset('assets/images/deusmagnus.png', height: 100),
+              // Updated image section to stretch full width
+              SizedBox(
+                width: double.infinity,
+                child: Image.asset(
+                  'assets/images/logo.png',
+                  height: 160,
+                  fit: BoxFit.fitWidth,
+                ),
+              ),
               const SizedBox(height: 20),
               const Text(
                 "Welcome Back",
-                style: TextStyle(fontSize: 32, color: Colors.white, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  fontSize: 32,
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 14),
               const Text(
                 "Login to continue managing your properties",
                 style: TextStyle(fontSize: 16, color: Colors.white70),
@@ -91,10 +102,13 @@ class _LoginPageState extends State<LoginPage> {
                   fillColor: Colors.white,
                   prefixIcon: const Icon(Icons.email, color: Color(0xff284a79)),
                   hintText: "Email",
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: BorderSide.none,
+                  ),
                 ),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 33.0),
               TextField(
                 controller: passwordController,
                 obscureText: !isPasswordVisible,
@@ -103,23 +117,40 @@ class _LoginPageState extends State<LoginPage> {
                   fillColor: Colors.white,
                   prefixIcon: const Icon(Icons.lock, color: Color(0xff284a79)),
                   hintText: "Password",
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: BorderSide.none,
+                  ),
                   suffixIcon: IconButton(
-                    icon: Icon(isPasswordVisible ? Icons.visibility : Icons.visibility_off, color: const Color(0xff284a79)),
-                    onPressed: () => setState(() => isPasswordVisible = !isPasswordVisible),
+                    icon: Icon(
+                      isPasswordVisible
+                          ? Icons.visibility
+                          : Icons.visibility_off,
+                      color: const Color(0xff284a79),
+                    ),
+                    onPressed: () =>
+                        setState(() => isPasswordVisible = !isPasswordVisible),
                   ),
                 ),
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 12.0),
               Align(
                 alignment: Alignment.centerRight,
                 child: TextButton(
                   onPressed: () {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text("Forgot password not implemented yet")),
+                      const SnackBar(
+                        content: Text("Forgot password not implemented yet"),
+                      ),
                     );
                   },
-                  child: const Text("Forgot Password?", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                  child: const Text(
+                    "Forgot Password?",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
               ),
               const SizedBox(height: 20),
@@ -131,19 +162,36 @@ class _LoginPageState extends State<LoginPage> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.white,
                     foregroundColor: const Color(0xff284a79),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
                   ),
-                  child: const Text("Login", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  child: const Text(
+                    "Login",
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
                 ),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 34),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text("Don't have an account? ", style: TextStyle(color: Colors.white70)),
+                  const Text(
+                    "Don't have an account? ",
+                    style: TextStyle(color: Colors.white70),
+                  ),
                   GestureDetector(
-                    onTap: () => Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const SignUpPage())),
-                    child: const Text("Sign Up", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                    onTap: () => Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (_) => const SignUpPage()),
+                    ),
+                    child: const Text(
+                      "Sign Up",
+                      style: TextStyle(
+                        color: Colors.amber,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
                 ],
               ),
