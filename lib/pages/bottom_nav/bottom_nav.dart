@@ -12,7 +12,7 @@ class BottomNav extends StatefulWidget {
 }
 
 class _BottomNavState extends State<BottomNav> { 
-  
+
   late List<Widget> pages;
 
   late Homepage homepage;
@@ -48,9 +48,9 @@ class _BottomNavState extends State<BottomNav> {
         onTap: (index) {
           setState(() {
             currentTabIndex = index;
-          });
-        },
-        items: const [
+          });  
+        }, 
+        items: const [   
           BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
           BottomNavigationBarItem(
             icon: Icon(Icons.apartment),

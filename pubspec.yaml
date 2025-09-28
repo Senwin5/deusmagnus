@@ -19,6 +19,7 @@ dependencies:
 
   # 🎥 Add video support
   video_player: ^2.8.6
+  firebase_core: ^4.1.1
 
 dev_dependencies:
   flutter_test:
