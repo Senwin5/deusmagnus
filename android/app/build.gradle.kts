@@ -2,12 +2,12 @@ plugins {
     id("com.android.application")
     id("kotlin-android")
     id("dev.flutter.flutter-gradle-plugin")
-    id("com.google.gms.google-services") version "4.4.1" // Added version as required
+    id("com.google.gms.google-services") // ✅ leave version out here
 }
 
 android {
-    namespace = "com.example.deusmagnus"
-    compileSdk = 35 // Updated to 35 as recommended for video_player_android plugin
+    namespace = "com.example.deusmagnus" // Must match your package name
+    compileSdk = 35
 
     ndkVersion = "27.0.12077973"
 
@@ -21,9 +21,9 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.deusmagnus.deusmagnus"
+        applicationId = "com.deusmagnus.deusmagnus" // ✅ MUST match Firebase console
         minSdk = 23
-        targetSdk = 35 // Match compileSdk for best compatibility
+        targetSdk = 35
         versionCode = 1
         versionName = "1.0.0"
     }
@@ -46,8 +46,7 @@ dependencies {
     // Firebase Analytics
     implementation("com.google.firebase:firebase-analytics")
 
-    // Uncomment and add other Firebase dependencies if needed:
-    // implementation("com.google.firebase:firebase-auth")
-    // implementation("com.google.firebase:firebase-firestore")
+    // Add Firebase Auth & Firestore since you’re using them
+    implementation("com.google.firebase:firebase-auth")
+    implementation("com.google.firebase:firebase-firestore")
 }
-

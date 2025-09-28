@@ -80,7 +80,7 @@ class _LoginPageState extends State<LoginPage> {
         height: double.infinity,
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-            colors: [Color(0xff284a79), Color(0xff6da4f7)],
+            colors: [Color(0xff284a79), Color(0xff284a79)],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
@@ -98,16 +98,16 @@ class _LoginPageState extends State<LoginPage> {
                   fit: BoxFit.fitWidth,
                 ),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 30.0),
               const Text(
                 "Welcome Back",
                 style: TextStyle(
                   fontSize: 32,
-                  color: Colors.white,
+                  color: Colors.amber,
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              const SizedBox(height: 14),
+              const SizedBox(height: 16),
               const Text(
                 "Login to continue managing your properties",
                 style: TextStyle(fontSize: 16, color: Colors.white70),
@@ -181,8 +181,8 @@ class _LoginPageState extends State<LoginPage> {
                 child: ElevatedButton(
                   onPressed: isLoading ? null : _login,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    foregroundColor: const Color(0xff284a79),
+                    backgroundColor: const Color(0xff284a79),
+                    foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
                     ),

@@ -12,12 +12,14 @@ dependencies:
   flutter:
     sdk: flutter
 
-  shared_preferences: ^2.1.1
-  cupertino_icons: ^1.0.8
+  # Firebase & other dependencies
   firebase_core: ^4.1.1
-  video_player: ^2.10.0
   firebase_auth: ^6.1.0
   cloud_firestore: ^6.0.2
+
+  shared_preferences: ^2.1.1
+  cupertino_icons: ^1.0.8
+  video_player: ^2.10.0
 
 dev_dependencies:
   flutter_test:
@@ -25,3 +27,6 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+
+  assets:
+    - assets/images/
