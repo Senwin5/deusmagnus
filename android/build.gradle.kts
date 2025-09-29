@@ -1,4 +1,4 @@
-// Project-level build.gradle.kts
+// Top-level build file where you can add configuration options common to all sub-projects/modules.
 
 buildscript {
     repositories {
@@ -6,11 +6,8 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        // Android Gradle Plugin
         classpath("com.android.tools.build:gradle:8.2.1")
-        // Google Services plugin for Firebase
-        classpath("com.google.gms:google-services:4.4.2")
-        // Kotlin Gradle plugin
+        classpath("com.google.gms:google-services:4.4.3")
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:1.9.10")
     }
 }
@@ -22,7 +19,7 @@ allprojects {
     }
 }
 
-// Optional: custom build directories (keep if you were using them)
+// Optional: custom build directories (if needed)
 val newBuildDir: Directory = rootProject.layout.buildDirectory.dir("../../build").get()
 rootProject.layout.buildDirectory.value(newBuildDir)
 
