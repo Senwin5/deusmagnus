@@ -9,7 +9,6 @@ void main() async {
 }
 
 
-s
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
