@@ -1,0 +1,27 @@
+{
+    "files.autoSave": "afterDelay",
+    "[dart]": {
+        "editor.formatOnSave": true,
+        "editor.formatOnType": true,
+        "editor.rulers": [
+            80
+        ],
+        "editor.selectionHighlight": false,
+        "editor.tabCompletion": "onlySnippets",
+        "editor.wordBasedSuggestions": "off"
+    },
+    "workbench.iconTheme": "material-icon-theme",
+    "security.workspace.trust.untrustedFiles": "open",
+    "explorer.confirmDelete": false,
+    "dart.debugExternalPackageLibraries": false,
+    "dart.debugSdkLibraries": false,
+    "dart.openDevTools": "flutter",
+    "git.openRepositoryInParentFolders": "always",
+
+    // ✅ Correct Flutter/Dart SDK paths for Windows
+    "dart.flutterSdkPath": "C:/Users/SenwinTech/flutter",
+    "dart.sdkPath": "C:/Users/SenwinTech/flutter/bin/cache/dart-sdk",
+    "terminal.integrated.env.windows": {
+        "PATH": "C:\\Users\\SenwinTech\\flutter\\bin;${env:PATH}"
+    }
+}

@@ -1,6 +1,5 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-// ignore: depend_on_referenced_packages
-import 'package:video_player/video_player.dart';
 
 class Homepage extends StatefulWidget {
   const Homepage({super.key});
@@ -10,26 +9,6 @@ class Homepage extends StatefulWidget {
 }
 
 class _HomepageState extends State<Homepage> {
-  late VideoPlayerController _controller;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = VideoPlayerController.asset("assets/videos/demo.mp4")
-      ..initialize().then((_) {
-        setState(() {}); // refresh once video is ready
-        _controller.play(); // autoplay
-        _controller.setLooping(true); // loop forever
-        _controller.setVolume(0); // mute
-      });
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -63,19 +42,15 @@ class _HomepageState extends State<Homepage> {
             ),
             const SizedBox(height: 20.0),
 
-            // 🎥 Banner video
+            // 🖼 Banner image (instead of video)
             ClipRRect(
               borderRadius: BorderRadius.circular(16),
-              child: _controller.value.isInitialized
-                  ? AspectRatio(
-                      aspectRatio: _controller.value.aspectRatio,
-                      child: VideoPlayer(_controller),
-                    )
-                  : Container(
-                      height: 320,
-                      color: Colors.black12,
-                      child: const Center(child: CircularProgressIndicator()),
-                    ),
+              child: Image.asset(
+                "assets/images/deusmagnus.png", // change to your banner image
+                height: 320,
+                width: double.infinity,
+                fit: BoxFit.cover,
+              ),
             ),
             const SizedBox(height: 20.0),
 

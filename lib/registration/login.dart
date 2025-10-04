@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/widgets.dart';
-import 'forgot_password.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:deusmagnus/registration/signup_page.dart';
+import 'package:deusmagnus/registration/forgot_password.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -16,44 +17,40 @@ class _LoginPageState extends State<LoginPage> {
   bool isLoading = false;
 
   Future<void> _login() async {
-    String email = emailController.text.trim();
-    String password = passwordController.text.trim();
-
-    if (email.isEmpty || password.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Please fill in all fields")),
-      );
-      return;
-    }
-
     setState(() => isLoading = true);
 
     try {
       UserCredential userCredential = await FirebaseAuth.instance
-          .signInWithEmailAndPassword(email: email, password: password);
+          .signInWithEmailAndPassword(
+              email: emailController.text.trim(),
+              password: passwordController.text.trim());
 
-      User? user = userCredential.user;
+      // ✅ Fetch username from Firestore
+      DocumentSnapshot userDoc = await FirebaseFirestore.instance
+          .collection("users")
+          .doc(userCredential.user!.uid)
+          .get();
 
-      if (user != null) {
+      String username = userDoc["username"] ?? "User";
+
+      if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Welcome back, ${user.displayName ?? 'User'}")),
+          SnackBar(
+            backgroundColor: Colors.green,
+            content: Text("Welcome back, $username!"),
+          ),
         );
-
-        // Navigate to home/dashboard
-        // Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => HomePage()));
       }
+
+      // TODO: Navigate to your main/home page here
+      // Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => HomePage()));
+
     } on FirebaseAuthException catch (e) {
-      String message = "Login failed";
-      if (e.code == "user-not-found") {
-        message = "No user found with this email.";
-      } else if (e.code == "wrong-password") {
-        message = "Wrong password.";
-      } else if (e.code == "invalid-email") {
-        message = "Invalid email format.";
-      }
-
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(message), backgroundColor: Colors.red),
+        SnackBar(
+          backgroundColor: Colors.red,
+          content: Text(e.message ?? "Login failed"),
+        ),
       );
     } finally {
       setState(() => isLoading = false);
@@ -63,10 +60,6 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: const Color(0xff284a79),
-        title: const Text("Login", style: TextStyle(color: Colors.amber)),
-      ),
       body: Container(
         width: double.infinity,
         height: double.infinity,
@@ -78,22 +71,21 @@ class _LoginPageState extends State<LoginPage> {
           ),
         ),
         child: Padding(
-          padding: const EdgeInsets.all(25),
+          padding: const EdgeInsets.all(24.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               const Text(
-                "Welcome Back!",
+                "Login",
                 style: TextStyle(
-                  fontSize: 26,
-                  fontWeight: FontWeight.bold,
+                  fontSize: 32,
                   color: Colors.amber,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
               const SizedBox(height: 40),
               TextField(
                 controller: emailController,
-                keyboardType: TextInputType.emailAddress,
                 decoration: InputDecoration(
                   filled: true,
                   fillColor: Colors.white,
@@ -120,23 +112,30 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                 ),
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 20),
+
+              // ✅ Forgot Password Button
               Align(
                 alignment: Alignment.centerRight,
                 child: TextButton(
                   onPressed: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (_) => const ForgotPasswordPage()),
+                      MaterialPageRoute(
+                          builder: (_) => const ForgotPasswordPage()),
                     );
                   },
                   child: const Text(
                     "Forgot Password?",
-                    style: TextStyle(color: Colors.amber, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      color: Colors.amber,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
               ),
-              const SizedBox(height: 30),
+
+              const SizedBox(height: 20),
               SizedBox(
                 width: double.infinity,
                 height: 55,
@@ -151,13 +150,45 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                   child: isLoading
                       ? const CircularProgressIndicator(
-                          valueColor: AlwaysStoppedAnimation<Color>(Colors.amber),
+                          valueColor:
+                              AlwaysStoppedAnimation<Color>(Colors.white),
                         )
                       : const Text(
                           "Login",
-                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.amber),
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.amber,
+                          ),
                         ),
                 ),
+              ),
+              const SizedBox(height: 20),
+
+              // ✅ "Don't have an account?"
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text(
+                    "Don’t have an account?",
+                    style: TextStyle(color: Colors.white),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(builder: (_) => const SignupPage()),
+                      );
+                    },
+                    child: const Text(
+                      "Sign Up",
+                      style: TextStyle(
+                        color: Colors.amber,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),

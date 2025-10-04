@@ -7,12 +7,12 @@ plugins {
 
 android {
     namespace = "com.deusmagnus.deusmagnus"
-    compileSdk = 34   // ✅ match installed SDK (you don’t have 35/36 installed)
+    compileSdk = 35   // 🔥 updated from 34 to 35
 
     defaultConfig {
         applicationId = "com.deusmagnus.deusmagnus"
         minSdk = 23
-        targetSdk = 34
+        targetSdk = 35   // 🔥 update to match compileSdk
         versionCode = 1
         versionName = "1.0.0"
     }
