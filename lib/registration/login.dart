@@ -28,7 +28,6 @@ class _LoginPageState extends State<LoginPage> {
       );
       return;
     }
-
     setState(() => isLoading = true);
 
     try {
