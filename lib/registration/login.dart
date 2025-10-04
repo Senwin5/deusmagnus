@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:deusmagnus/pages/bottom_nav/bottom_nav.dart';
 import 'signup_page.dart';
 
@@ -31,21 +32,29 @@ class _LoginPageState extends State<LoginPage> {
     setState(() => isLoading = true);
 
     try {
-      await FirebaseAuth.instance.signInWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
+      // 🔹 Authenticate user
+      UserCredential userCredential = await FirebaseAuth.instance
+          .signInWithEmailAndPassword(email: email, password: password);
+
+      String uid = userCredential.user!.uid;
+
+      // 🔹 Fetch user details from Firestore
+      DocumentSnapshot userDoc =
+          await FirebaseFirestore.instance.collection("users").doc(uid).get();
+
+      String? fullName = userDoc["fullName"];
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           backgroundColor: Colors.green,
-          content: Text("Welcome back!"),
+          content: Text("Welcome back, $fullName!"),
         ),
       );
 
+      // 🔹 Pass fullName to your BottomNav
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (_) => const BottomNav()),
+        MaterialPageRoute(builder: (_) => BottomNav(fullName: fullName)),
       );
     } on FirebaseAuthException catch (e) {
       String message = "Login failed";
@@ -158,7 +167,6 @@ class _LoginPageState extends State<LoginPage> {
                 alignment: Alignment.centerRight,
                 child: TextButton(
                   onPressed: () {
-                    // TODO: Add Firebase password reset
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
                         content: Text("Forgot password coming soon"),
@@ -190,12 +198,15 @@ class _LoginPageState extends State<LoginPage> {
                   child: isLoading
                       ? const CircularProgressIndicator(
                           valueColor:
-                              AlwaysStoppedAnimation<Color>(Color(0xff284a79)),
+                              AlwaysStoppedAnimation<Color>(Colors.white),
                         )
                       : const Text(
                           "Login",
                           style: TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.bold),
+                            fontSize: 18.0,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.amber,
+                          ),
                         ),
                 ),
               ),
@@ -205,7 +216,10 @@ class _LoginPageState extends State<LoginPage> {
                 children: [
                   const Text(
                     "Don't have an account? ",
-                    style: TextStyle(color: Colors.white70),
+                    style: TextStyle(
+                      color: Colors.white70,
+                      fontSize: 16.0,
+                    ),
                   ),
                   GestureDetector(
                     onTap: () => Navigator.pushReplacement(
@@ -217,6 +231,7 @@ class _LoginPageState extends State<LoginPage> {
                       style: TextStyle(
                         color: Colors.amber,
                         fontWeight: FontWeight.bold,
+                        fontSize: 16.0,
                       ),
                     ),
                   ),

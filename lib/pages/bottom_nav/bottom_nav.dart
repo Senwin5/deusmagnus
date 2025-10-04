@@ -5,7 +5,7 @@ import 'package:deusmagnus/pages/properties.dart';
 import 'package:flutter/material.dart';
 
 class BottomNav extends StatefulWidget {
-  const BottomNav({super.key});
+  const BottomNav({super.key, String? fullName});
 
   @override
   State<BottomNav> createState() => _BottomNavState();
