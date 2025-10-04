@@ -4,8 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-// ✅ Import LoginPage
-
 class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});
 
@@ -17,32 +15,18 @@ class _SignUpPageState extends State<SignUpPage> {
   final TextEditingController nameController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-  final TextEditingController confirmPasswordController =
-      TextEditingController();
 
   bool isPasswordVisible = false;
-  bool isConfirmPasswordVisible = false;
   bool isLoading = false;
 
   Future<void> _signUp() async {
     String name = nameController.text.trim();
     String email = emailController.text.trim();
     String password = passwordController.text.trim();
-    String confirmPassword = confirmPasswordController.text.trim();
 
-    if (name.isEmpty ||
-        email.isEmpty ||
-        password.isEmpty ||
-        confirmPassword.isEmpty) {
+    if (name.isEmpty || email.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Please fill all fields")),
-      );
-      return;
-    }
-
-    if (password != confirmPassword) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Passwords do not match")),
       );
       return;
     }
@@ -50,6 +34,7 @@ class _SignUpPageState extends State<SignUpPage> {
     setState(() => isLoading = true);
 
     try {
+      // Create User in Firebase Auth
       UserCredential userCredential = await FirebaseAuth.instance
           .createUserWithEmailAndPassword(email: email, password: password);
 
@@ -60,6 +45,7 @@ class _SignUpPageState extends State<SignUpPage> {
         await user.reload();
         user = FirebaseAuth.instance.currentUser;
 
+        // Save user details in Firestore
         await FirebaseFirestore.instance
             .collection("users")
             .doc(user!.uid)
@@ -69,12 +55,25 @@ class _SignUpPageState extends State<SignUpPage> {
           "createdAt": FieldValue.serverTimestamp(),
           "role": "user",
         });
-      }
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-            content: Text("Welcome, $name! Your account has been created.")),
-      );
+        // ✅ Fetch back the saved user data
+        DocumentSnapshot snapshot = await FirebaseFirestore.instance
+            .collection("users")
+            .doc(user.uid)
+            .get();
+
+        if (snapshot.exists) {
+          var userData = snapshot.data() as Map<String, dynamic>;
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                "Welcome, ${userData["fullName"]}! Your account has been created.",
+              ),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
+      }
 
       if (mounted) {
         Navigator.pushReplacement(
@@ -123,6 +122,7 @@ class _SignUpPageState extends State<SignUpPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
+              // Logo
               SizedBox(
                 width: double.infinity,
                 child: Image.asset(
@@ -132,6 +132,8 @@ class _SignUpPageState extends State<SignUpPage> {
                 ),
               ),
               const SizedBox(height: 10),
+
+              // Title
               const Text(
                 "Create Account",
                 style: TextStyle(
@@ -147,6 +149,8 @@ class _SignUpPageState extends State<SignUpPage> {
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 35),
+
+              // Full Name
               TextField(
                 controller: nameController,
                 decoration: InputDecoration(
@@ -162,6 +166,8 @@ class _SignUpPageState extends State<SignUpPage> {
                 ),
               ),
               const SizedBox(height: 25),
+
+              // Email
               TextField(
                 controller: emailController,
                 keyboardType: TextInputType.emailAddress,
@@ -177,6 +183,8 @@ class _SignUpPageState extends State<SignUpPage> {
                 ),
               ),
               const SizedBox(height: 25),
+
+              // Password
               TextField(
                 controller: passwordController,
                 obscureText: !isPasswordVisible,
@@ -201,34 +209,9 @@ class _SignUpPageState extends State<SignUpPage> {
                   ),
                 ),
               ),
-              const SizedBox(height: 25),
-              TextField(
-                controller: confirmPasswordController,
-                obscureText: !isConfirmPasswordVisible,
-                decoration: InputDecoration(
-                  filled: true,
-                  fillColor: Colors.white,
-                  prefixIcon: const Icon(Icons.lock, color: Color(0xff284a79)),
-                  hintText: "Confirm Password",
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(16),
-                    borderSide: BorderSide.none,
-                  ),
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      isConfirmPasswordVisible
-                          ? Icons.visibility
-                          : Icons.visibility_off,
-                      color: const Color(0xff284a79),
-                    ),
-                    onPressed: () => setState(
-                      () =>
-                          isConfirmPasswordVisible = !isConfirmPasswordVisible,
-                    ),
-                  ),
-                ),
-              ),
               const SizedBox(height: 30),
+
+              // Sign Up Button
               SizedBox(
                 width: double.infinity,
                 height: 55,
@@ -253,6 +236,8 @@ class _SignUpPageState extends State<SignUpPage> {
                 ),
               ),
               const SizedBox(height: 20),
+
+              // Already have an account? Login
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [

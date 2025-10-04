@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:deusmagnus/pages/bottom_nav/bottom_nav.dart';
-import 'signup_page.dart';
+import 'package:flutter/widgets.dart';
+import 'forgot_password.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -14,8 +13,6 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-
-  bool isPasswordVisible = false;
   bool isLoading = false;
 
   Future<void> _login() async {
@@ -24,56 +21,39 @@ class _LoginPageState extends State<LoginPage> {
 
     if (email.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Please fill all fields")),
+        const SnackBar(content: Text("Please fill in all fields")),
       );
       return;
     }
+
     setState(() => isLoading = true);
 
     try {
-      // 🔹 Authenticate user
       UserCredential userCredential = await FirebaseAuth.instance
           .signInWithEmailAndPassword(email: email, password: password);
 
-      String uid = userCredential.user!.uid;
+      User? user = userCredential.user;
 
-      // 🔹 Fetch user details from Firestore
-      DocumentSnapshot userDoc =
-          await FirebaseFirestore.instance.collection("users").doc(uid).get();
+      if (user != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Welcome back, ${user.displayName ?? 'User'}")),
+        );
 
-      String? fullName = userDoc["fullName"];
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          backgroundColor: Colors.green,
-          content: Text("Welcome back, $fullName!"),
-        ),
-      );
-
-      // 🔹 Pass fullName to your BottomNav
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => BottomNav(fullName: fullName)),
-      );
+        // Navigate to home/dashboard
+        // Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => HomePage()));
+      }
     } on FirebaseAuthException catch (e) {
       String message = "Login failed";
       if (e.code == "user-not-found") {
-        message = "No user found for this email";
+        message = "No user found with this email.";
       } else if (e.code == "wrong-password") {
-        message = "Incorrect password";
+        message = "Wrong password.";
       } else if (e.code == "invalid-email") {
-        message = "Invalid email format";
+        message = "Invalid email format.";
       }
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(backgroundColor: Colors.red, content: Text(message)),
-      );
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          backgroundColor: Colors.red,
-          content: Text("Error: $e"),
-        ),
+        SnackBar(content: Text(message), backgroundColor: Colors.red),
       );
     } finally {
       setState(() => isLoading = false);
@@ -83,6 +63,10 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        backgroundColor: const Color(0xff284a79),
+        title: const Text("Login", style: TextStyle(color: Colors.amber)),
+      ),
       body: Container(
         width: double.infinity,
         height: double.infinity,
@@ -93,33 +77,18 @@ class _LoginPageState extends State<LoginPage> {
             end: Alignment.bottomRight,
           ),
         ),
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 50),
+        child: Padding(
+          padding: const EdgeInsets.all(25),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              SizedBox(
-                width: double.infinity,
-                child: Image.asset(
-                  'assets/images/logo.png',
-                  height: 160,
-                  fit: BoxFit.fitWidth,
-                ),
-              ),
-              const SizedBox(height: 30.0),
               const Text(
-                "Welcome Back",
+                "Welcome Back!",
                 style: TextStyle(
-                  fontSize: 32,
-                  color: Colors.amber,
+                  fontSize: 26,
                   fontWeight: FontWeight.bold,
+                  color: Colors.amber,
                 ),
-              ),
-              const SizedBox(height: 16),
-              const Text(
-                "Login to continue managing your properties",
-                style: TextStyle(fontSize: 16, color: Colors.white70),
-                textAlign: TextAlign.center,
               ),
               const SizedBox(height: 40),
               TextField(
@@ -136,10 +105,10 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                 ),
               ),
-              const SizedBox(height: 33.0),
+              const SizedBox(height: 20),
               TextField(
                 controller: passwordController,
-                obscureText: !isPasswordVisible,
+                obscureText: true,
                 decoration: InputDecoration(
                   filled: true,
                   fillColor: Colors.white,
@@ -149,39 +118,25 @@ class _LoginPageState extends State<LoginPage> {
                     borderRadius: BorderRadius.circular(16),
                     borderSide: BorderSide.none,
                   ),
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      isPasswordVisible
-                          ? Icons.visibility
-                          : Icons.visibility_off,
-                      color: const Color(0xff284a79),
-                    ),
-                    onPressed: () =>
-                        setState(() => isPasswordVisible = !isPasswordVisible),
-                  ),
                 ),
               ),
-              const SizedBox(height: 12.0),
+              const SizedBox(height: 10),
               Align(
                 alignment: Alignment.centerRight,
                 child: TextButton(
                   onPressed: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text("Forgot password coming soon"),
-                      ),
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const ForgotPasswordPage()),
                     );
                   },
                   child: const Text(
                     "Forgot Password?",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: TextStyle(color: Colors.amber, fontWeight: FontWeight.bold),
                   ),
                 ),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 30),
               SizedBox(
                 width: double.infinity,
                 height: 55,
@@ -196,45 +151,13 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                   child: isLoading
                       ? const CircularProgressIndicator(
-                          valueColor:
-                              AlwaysStoppedAnimation<Color>(Colors.white),
+                          valueColor: AlwaysStoppedAnimation<Color>(Colors.amber),
                         )
                       : const Text(
                           "Login",
-                          style: TextStyle(
-                            fontSize: 18.0,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.amber,
-                          ),
+                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.amber),
                         ),
                 ),
-              ),
-              const SizedBox(height: 34),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text(
-                    "Don't have an account? ",
-                    style: TextStyle(
-                      color: Colors.white70,
-                      fontSize: 16.0,
-                    ),
-                  ),
-                  GestureDetector(
-                    onTap: () => Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(builder: (_) => const SignUpPage()),
-                    ),
-                    child: const Text(
-                      "Sign Up",
-                      style: TextStyle(
-                        color: Colors.amber,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16.0,
-                      ),
-                    ),
-                  ),
-                ],
               ),
             ],
           ),

@@ -7,7 +7,7 @@ plugins {
 
 android {
     namespace = "com.deusmagnus.deusmagnus"
-    compileSdk = 35
+    compileSdk = 34   // ✅ match installed SDK (you don’t have 35/36 installed)
 
     defaultConfig {
         applicationId = "com.deusmagnus.deusmagnus"
@@ -41,7 +41,7 @@ dependencies {
     // Firebase BoM for consistent versioning
     implementation(platform("com.google.firebase:firebase-bom:34.3.0"))
 
-    // Use non-KTX modules (KTX deprecated in recent BoM)
+    // Firebase modules
     implementation("com.google.firebase:firebase-analytics")
     implementation("com.google.firebase:firebase-auth")
     implementation("com.google.firebase:firebase-firestore")
