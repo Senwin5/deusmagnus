@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class Homepage extends StatefulWidget {
@@ -236,6 +235,7 @@ class _HomepageState extends State<Homepage> {
         width: 100,
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
+          // ignore: deprecated_member_use
           color: color.withOpacity(0.1),
           borderRadius: BorderRadius.circular(16),
         ),

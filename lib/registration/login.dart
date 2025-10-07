@@ -42,9 +42,7 @@ class _LoginPageState extends State<LoginPage> {
         );
       }
 
-      // TODO: Navigate to your main/home page here
       // Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => HomePage()));
-
     } on FirebaseAuthException catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -177,7 +175,7 @@ class _LoginPageState extends State<LoginPage> {
                     onPressed: () {
                       Navigator.pushReplacement(
                         context,
-                        MaterialPageRoute(builder: (_) => const SignupPage()),
+                        MaterialPageRoute(builder: (_) => const SignUpPage()),
                       );
                     },
                     child: const Text(

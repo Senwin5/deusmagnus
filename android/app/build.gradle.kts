@@ -7,11 +7,11 @@ plugins {
 
 android {
     namespace = "com.deusmagnus.deusmagnus"
-    compileSdk = 35   // 🔥 updated from 34 to 35
+    compileSdk = 36   // 🔥 updated from 34 to 35
 
     defaultConfig {
         applicationId = "com.deusmagnus.deusmagnus"
-        minSdk = 23
+        minSdk = flutter.minSdkVersion
         targetSdk = 35   // 🔥 update to match compileSdk
         versionCode = 1
         versionName = "1.0.0"
