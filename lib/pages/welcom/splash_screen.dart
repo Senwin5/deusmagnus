@@ -23,8 +23,11 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   Future<void> _checkStatus() async {
-    final prefs = await SharedPreferences.getInstance();
-    bool hasSeenOnboarding = prefs.getBool('hasSeenOnboarding') ?? false;
+    await SharedPreferences.getInstance();
+
+    // 🔹 Force onboarding for testing
+    bool hasSeenOnboarding = false; // always false during testing
+
     User? user = FirebaseAuth.instance.currentUser;
 
     if (!hasSeenOnboarding) {
@@ -32,6 +35,7 @@ class _SplashScreenState extends State<SplashScreen> {
         context,
         MaterialPageRoute(builder: (_) => const OnboardingScreen()),
       );
+    // ignore: dead_code
     } else if (user == null) {
       Navigator.pushReplacement(
         context,
@@ -51,15 +55,12 @@ class _SplashScreenState extends State<SplashScreen> {
       body: Stack(
         fit: StackFit.expand,
         children: [
-          // Static background
           Image.asset(
-            'assets/images/house1.png', // your static splash background
+            'assets/images/house1.png', // static splash background
             fit: BoxFit.cover,
           ),
-          // Overlay to darken background
           // ignore: deprecated_member_use
-          Container(color: Colors.black.withOpacity(0.3)),
-          // Center logo and app name
+          Container(color: Colors.black.withOpacity(0.3)), // dark overlay
           Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
