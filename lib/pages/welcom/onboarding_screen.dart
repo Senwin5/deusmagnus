@@ -1,147 +1,76 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:introduction_screen/introduction_screen.dart';
 import 'package:deusmagnus/registration/login.dart';
 
-class OnboardingScreen extends StatefulWidget {
+class OnboardingScreen extends StatelessWidget {
   const OnboardingScreen({super.key});
 
-  @override
-  State<OnboardingScreen> createState() => _OnboardingScreenState();
-}
-
-class _OnboardingScreenState extends State<OnboardingScreen> {
-  final PageController _controller = PageController();
-  int _currentPage = 0;
-
-  final List<Map<String, String>> onboardingData = [
-    {
-      "image": "assets/images/house1.png",
-      "title": "Buy and Sell Properties",
-      "desc": "Find your dream home or sell your property easily."
-    },
-    {
-      "image": "assets/images/house2.png",
-      "title": "Explore Luxury Projects",
-      "desc": "Discover the best real estate investments available."
-    },
-    {
-      "image": "assets/images/house3.png",
-      "title": "Get Started with Deus Magnus",
-      "desc": "Sign up to start your real estate journey today."
-    },
-  ];
-
-  Future<void> _completeOnboarding() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('seenOnboarding', true);
-
-    if (mounted) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => const LoginPage()),
-      );
-    }
+  void _onIntroEnd(context) {
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(builder: (_) => const LoginPage()),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: SafeArea(
-        child: Column(
-          children: [
-            Expanded(
-              flex: 8,
-              child: PageView.builder(
-                controller: _controller,
-                onPageChanged: (index) => setState(() => _currentPage = index),
-                itemCount: onboardingData.length,
-                itemBuilder: (context, index) {
-                  final item = onboardingData[index];
-                  return Padding(
-                    padding: const EdgeInsets.all(20.0),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Image.asset(item["image"]!, height: 250),
-                        const SizedBox(height: 40),
-                        Text(
-                          item["title"]!,
-                          style: const TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            color: Color(0xff284a79),
-                          ),
-                        ),
-                        const SizedBox(height: 20),
-                        Text(
-                          item["desc"]!,
-                          textAlign: TextAlign.center,
-                          style:
-                              const TextStyle(fontSize: 16, color: Colors.grey),
-                        ),
-                      ],
-                    ),
-                  );
-                },
-              ),
-            ),
-            Expanded(
-              flex: 2,
-              child: Column(
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: List.generate(
-                      onboardingData.length,
-                      (index) => Container(
-                        margin: const EdgeInsets.all(5),
-                        width: _currentPage == index ? 12 : 8,
-                        height: _currentPage == index ? 12 : 8,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: _currentPage == index
-                              ? const Color(0xff284a79)
-                              : Colors.grey,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  ElevatedButton(
-                    onPressed: _currentPage == onboardingData.length - 1
-                        ? _completeOnboarding
-                        : () {
-                            _controller.nextPage(
-                              duration: const Duration(milliseconds: 400),
-                              curve: Curves.easeInOut,
-                            );
-                          },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xff284a79),
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 40, vertical: 12),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                    ),
-                    child: Text(
-                      _currentPage == onboardingData.length - 1
-                          ? "Get Started"
-                          : "Next",
-                      style: const TextStyle(
-                        fontSize: 18,
-                        color: Colors.amber,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
+    const pageDecoration = PageDecoration(
+      titleTextStyle: TextStyle(
+        fontSize: 26.0,
+        fontWeight: FontWeight.bold,
+        color: Color(0xff284a79),
+      ),
+      bodyTextStyle: TextStyle(fontSize: 18.0, color: Colors.black87),
+      bodyPadding: EdgeInsets.symmetric(
+          horizontal: 16.0, vertical: 8.0), // ✅ updated here
+      imagePadding: EdgeInsets.all(24),
+      pageColor: Colors.white,
+    );
+
+    return IntroductionScreen(
+      pages: [
+        PageViewModel(
+          title: "Buy Your Dream Home",
+          body:
+              "Explore premium listings, compare options, and find your ideal property with ease.",
+          image: Image.asset("assets/images/home1.png", height: 250),
+          decoration: pageDecoration,
+        ),
+        PageViewModel(
+          title: "Discover Luxury Properties",
+          body:
+              "Find apartments, villas, and houses that match your lifestyle and budget.",
+          image: Image.asset("assets/images/home2.png", height: 250),
+          decoration: pageDecoration,
+        ),
+        PageViewModel(
+          title: "Start Your Real Estate Journey",
+          body:
+              "Buy, rent, or invest — everything you need is just a tap away with DeusMagnus.",
+          image: Image.asset("assets/images/home3.png", height: 250),
+          decoration: pageDecoration,
+        ),
+      ],
+      onDone: () => _onIntroEnd(context),
+      showSkipButton: true, // ✅ Added skip button
+      skip: const Text("Skip",
+          style: TextStyle(color: Colors.amber, fontWeight: FontWeight.bold)),
+      next: const Icon(Icons.arrow_forward, color: Colors.amber),
+      done: const Text(
+        "Get Started",
+        style: TextStyle(fontWeight: FontWeight.bold, color: Colors.amber),
+      ),
+      dotsDecorator: const DotsDecorator(
+        size: Size(10.0, 10.0),
+        color: Colors.grey,
+        activeColor: Color(0xff284a79),
+        activeSize: Size(22.0, 10.0),
+        activeShape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(25.0)),
         ),
       ),
+      curve: Curves.easeInOut,
+      animationDuration: 700, // ✅ smooth transitions
+      globalBackgroundColor: Colors.white,
     );
   }
 }

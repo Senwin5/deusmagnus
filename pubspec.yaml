@@ -15,6 +15,7 @@ dependencies:
   # ✅ Firebase dependencies (all versions compatible)
   firebase_core: ^3.10.0
   firebase_auth: ^5.3.1
+  introduction_screen: ^3.1.12
   cloud_firestore: ^5.5.1
   firebase_storage: ^12.3.4
 
