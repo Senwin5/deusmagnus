@@ -13,33 +13,25 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   final PageController _pageController = PageController();
   int currentPage = 0;
 
-  final List<Map<String, String>> pages = [
+  final List<Map<String, String>> onboardingData = [
     {
       "title": "Buy Your Dream Home",
-      "subtitle": "Explore and find your perfect property",
+      "description": "Find and purchase your perfect property with ease.",
+      "image": "assets/images/house1.png",
     },
     {
-      "title": "Invest in Projects",
-      "subtitle": "Discover ongoing and upcoming projects",
+      "title": "Discover Projects",
+      "description": "Explore real estate projects in your area.",
+      "image": "assets/images/house2.png",
     },
     {
       "title": "Manage Properties",
-      "subtitle": "Easily manage your properties in one app",
+      "description": "Keep track of your properties efficiently.",
+      "image": "assets/images/house3.png",
     },
   ];
 
-  void _nextPage() {
-    if (currentPage < pages.length - 1) {
-      _pageController.nextPage(
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeIn,
-      );
-    } else {
-      _finishOnboarding();
-    }
-  }
-
-  Future<void> _finishOnboarding() async {
+  Future<void> _completeOnboarding() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('hasSeenOnboarding', true);
 
@@ -52,80 +44,99 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea(
-        child: Column(
-          children: [
-            Expanded(
-              child: PageView.builder(
-                controller: _pageController,
-                itemCount: pages.length,
-                onPageChanged: (index) => setState(() => currentPage = index),
-                itemBuilder: (_, index) => Padding(
-                  padding: const EdgeInsets.all(24.0),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      // Replace with image if needed
-                      const Icon(Icons.home,
-                          size: 120, color: Colors.blueAccent),
-                      const SizedBox(height: 40),
-                      Text(
-                        pages[index]["title"]!,
-                        style: const TextStyle(
-                          fontSize: 28,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 20),
-                      Text(
-                        pages[index]["subtitle"]!,
-                        style:
-                            const TextStyle(fontSize: 18, color: Colors.grey),
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: List.generate(
-                pages.length,
-                (index) => Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 5),
-                  width: currentPage == index ? 20 : 10,
-                  height: 10,
-                  decoration: BoxDecoration(
-                    color:
-                        currentPage == index ? Colors.blueAccent : Colors.grey,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 20),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      body: Stack(
+        children: [
+          PageView.builder(
+            controller: _pageController,
+            onPageChanged: (index) => setState(() => currentPage = index),
+            itemCount: onboardingData.length,
+            itemBuilder: (context, index) {
+              return Column(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  TextButton(
-                    onPressed: _finishOnboarding,
-                    child: const Text("Skip"),
+                  Image.asset(
+                    onboardingData[index]['image']!,
+                    height: 250,
                   ),
-                  ElevatedButton(
-                    onPressed: _nextPage,
-                    child:
-                        Text(currentPage == pages.length - 1 ? "Done" : "Next"),
+                  const SizedBox(height: 30),
+                  Text(
+                    onboardingData[index]['title']!,
+                    style: const TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xff284a79)),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 15),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 30),
+                    child: Text(
+                      onboardingData[index]['description']!,
+                      style: const TextStyle(
+                          fontSize: 16, color: Colors.grey, height: 1.5),
+                      textAlign: TextAlign.center,
+                    ),
                   ),
                 ],
+              );
+            },
+          ),
+          // Skip button
+          Positioned(
+            top: 50,
+            right: 20,
+            child: TextButton(
+              onPressed: _completeOnboarding,
+              child: const Text(
+                "Skip",
+                style: TextStyle(color: Colors.amber, fontSize: 16),
               ),
             ),
-            const SizedBox(height: 30),
-          ],
-        ),
+          ),
+          // Next / Done button
+          Positioned(
+            bottom: 50,
+            right: 20,
+            child: ElevatedButton(
+              onPressed: () {
+                if (currentPage == onboardingData.length - 1) {
+                  _completeOnboarding();
+                } else {
+                  _pageController.nextPage(
+                      duration: const Duration(milliseconds: 500),
+                      curve: Curves.ease);
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xff284a79),
+              ),
+              child: Text(
+                currentPage == onboardingData.length - 1 ? "Done" : "Next",
+              ),
+            ),
+          ),
+          // Dots indicator
+          Positioned(
+            bottom: 60,
+            left: 30,
+            child: Row(
+              children: List.generate(
+                onboardingData.length,
+                (index) => Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 4),
+                  width: currentPage == index ? 12 : 8,
+                  height: currentPage == index ? 12 : 8,
+                  decoration: BoxDecoration(
+                    color: currentPage == index
+                        ? const Color(0xff284a79)
+                        : Colors.grey,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
