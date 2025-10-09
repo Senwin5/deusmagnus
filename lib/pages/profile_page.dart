@@ -13,229 +13,163 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  final User? user = FirebaseAuth.instance.currentUser;
-  Map<String, dynamic>? userData;
-  bool isLoading = true;
-  bool isEditing = false;
-  TextEditingController nameController = TextEditingController();
+  final _auth = FirebaseAuth.instance;
+  final _firestore = FirebaseFirestore.instance;
+
+  final TextEditingController _nameController = TextEditingController();
+  bool _isLoading = false;
   File? _imageFile;
+  String? _photoUrl;
 
   @override
   void initState() {
     super.initState();
-    fetchUserData();
+    _loadUserProfile();
   }
 
-  Future<void> fetchUserData() async {
-    if (user == null) return;
-
-    try {
-      DocumentSnapshot snapshot = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(user!.uid)
-          .get();
-
-      if (snapshot.exists) {
-        userData = snapshot.data() as Map<String, dynamic>;
-        nameController.text = userData?['fullName'] ?? '';
+  Future<void> _loadUserProfile() async {
+    final user = _auth.currentUser;
+    if (user != null) {
+      final userDoc = await _firestore.collection('users').doc(user.uid).get();
+      if (userDoc.exists) {
+        final data = userDoc.data();
+        setState(() {
+          _nameController.text = data?['name'] ?? user.displayName ?? '';
+          _photoUrl = data?['photoUrl'] ?? user.photoURL;
+        });
       }
-    } catch (e) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text("Error loading profile: $e")));
-    }
-
-    setState(() => isLoading = false);
-  }
-
-  Future<void> pickImage() async {
-    final pickedFile =
-        await ImagePicker().pickImage(source: ImageSource.gallery);
-    if (pickedFile != null) {
-      setState(() {
-        _imageFile = File(pickedFile.path);
-      });
     }
   }
 
-  Future<String?> uploadProfileImage() async {
-    if (_imageFile == null || user == null) return null;
+  Future<void> _pickImage() async {
+    final picker = ImagePicker();
+    final pickedImage = await picker.pickImage(source: ImageSource.gallery);
 
-    final ref =
-        FirebaseStorage.instance.ref().child('profile_pics/${user!.uid}.jpg');
-
-    await ref.putFile(_imageFile!);
-    return await ref.getDownloadURL();
+    if (pickedImage != null) {
+      setState(() => _imageFile = File(pickedImage.path));
+    }
   }
 
-  Future<void> saveProfile() async {
+  Future<void> _saveProfile() async {
+    final user = _auth.currentUser;
     if (user == null) return;
 
-    setState(() => isLoading = true);
-    String name = nameController.text.trim();
-    String? imageUrl = userData?['photoUrl'];
+    setState(() => _isLoading = true);
+
+    String? photoUrl = _photoUrl;
 
     try {
+      // Upload new image if chosen
       if (_imageFile != null) {
-        imageUrl = await uploadProfileImage();
+        final ref = FirebaseStorage.instance
+            .ref()
+            .child('user_profiles')
+            .child('${user.uid}.jpg');
+
+        await ref.putFile(_imageFile!);
+        photoUrl = await ref.getDownloadURL();
       }
 
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(user!.uid)
-          .update({
-        'fullName': name,
-        'photoUrl': imageUrl,
-      });
+      // Update Firebase Auth profile
+      await user.updateDisplayName(_nameController.text.trim());
+      if (photoUrl != null) await user.updatePhotoURL(photoUrl);
 
-      await user!.updateDisplayName(name);
-      if (imageUrl != null) {
-        await user!.updatePhotoURL(imageUrl);
-      }
-
-      await fetchUserData();
+      // Update Firestore
+      await _firestore.collection('users').doc(user.uid).set({
+        'name': _nameController.text.trim(),
+        'email': user.email,
+        'photoUrl': photoUrl,
+      }, SetOptions(merge: true));
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Profile updated successfully!")),
+        const SnackBar(content: Text('Profile updated successfully')),
       );
-
-      setState(() => isEditing = false);
     } catch (e) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text("Error saving profile: $e")));
-    }
-
-    setState(() => isLoading = false);
-  }
-
-  Widget _buildAvatar() {
-    if (_imageFile != null) {
-      return CircleAvatar(radius: 60, backgroundImage: FileImage(_imageFile!));
-    } else if (userData?['photoUrl'] != null) {
-      return CircleAvatar(
-        radius: 60,
-        backgroundImage: NetworkImage(userData!['photoUrl']),
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: $e')),
       );
-    } else {
-      String name = userData?['fullName'] ?? 'User';
-      List<String> parts = name.split(' ');
-      String initials =
-          parts.length > 1 ? '${parts[0][0]}${parts[1][0]}' : name[0];
-      return CircleAvatar(
-        radius: 60,
-        backgroundColor: const Color(0xff284a79),
-        child: Text(
-          initials.toUpperCase(),
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 40,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      );
+    } finally {
+      setState(() => _isLoading = false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final user = _auth.currentUser;
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Profile"),
-        backgroundColor: const Color(0xff284a79),
-        actions: [
-          if (!isEditing)
-            IconButton(
-              icon: const Icon(Icons.edit, color: Colors.amber),
-              onPressed: () => setState(() => isEditing = true),
-            ),
-        ],
+        title: const Text('Profile'),
+        backgroundColor: Colors.deepPurple,
       ),
-      body: isLoading
+      body: _isLoading
           ? const Center(child: CircularProgressIndicator())
-          : userData == null
-              ? const Center(child: Text("No user data available"))
-              : SingleChildScrollView(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    children: [
-                      GestureDetector(
-                        onTap: isEditing ? pickImage : null,
-                        child: _buildAvatar(),
-                      ),
-                      const SizedBox(height: 20),
-
-                      // Name Field
-                      isEditing
-                          ? TextField(
-                              controller: nameController,
-                              decoration: const InputDecoration(
-                                labelText: "Full Name",
-                                border: OutlineInputBorder(),
+          : SingleChildScrollView(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                children: [
+                  Center(
+                    child: Stack(
+                      children: [
+                        CircleAvatar(
+                          radius: 60,
+                          backgroundImage: _imageFile != null
+                              ? FileImage(_imageFile!)
+                              : (_photoUrl != null
+                                  ? NetworkImage(_photoUrl!)
+                                  : const AssetImage(
+                                          'assets/images/default_avatar.png')
+                                      as ImageProvider),
+                        ),
+                        Positioned(
+                          bottom: 0,
+                          right: 0,
+                          child: InkWell(
+                            onTap: _pickImage,
+                            child: Container(
+                              decoration: const BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: Colors.deepPurple,
                               ),
-                            )
-                          : Text(
-                              userData!['fullName'] ?? 'No name',
-                              style: const TextStyle(
-                                fontSize: 22,
-                                fontWeight: FontWeight.bold,
-                              ),
+                              padding: const EdgeInsets.all(8),
+                              child: const Icon(Icons.edit,
+                                  color: Colors.white, size: 20),
                             ),
-
-                      const SizedBox(height: 10),
-                      Text(
-                        userData!['email'] ?? 'No email',
-                        style:
-                            const TextStyle(fontSize: 16, color: Colors.grey),
-                      ),
-
-                      const SizedBox(height: 30),
-
-                      if (isEditing)
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            ElevatedButton.icon(
-                              onPressed: saveProfile,
-                              icon: const Icon(Icons.save),
-                              label: const Text("Save"),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.green,
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 30, vertical: 12),
-                              ),
-                            ),
-                            const SizedBox(width: 20),
-                            ElevatedButton.icon(
-                              onPressed: () =>
-                                  setState(() => isEditing = false),
-                              icon: const Icon(Icons.cancel),
-                              label: const Text("Cancel"),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.redAccent,
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 30, vertical: 12),
-                              ),
-                            ),
-                          ],
-                        )
-                      else
-                        ElevatedButton.icon(
-                          onPressed: () async {
-                            await FirebaseAuth.instance.signOut();
-                            if (context.mounted) {
-                              Navigator.pushReplacementNamed(context, '/login');
-                            }
-                          },
-                          icon: const Icon(Icons.logout),
-                          label: const Text("Logout"),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.redAccent,
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 40, vertical: 12),
                           ),
                         ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
+                  const SizedBox(height: 30),
+                  TextField(
+                    controller: _nameController,
+                    decoration: const InputDecoration(
+                      labelText: 'Full Name',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  TextField(
+                    readOnly: true,
+                    decoration: InputDecoration(
+                      labelText: 'Email',
+                      hintText: user?.email ?? '',
+                      border: const OutlineInputBorder(),
+                    ),
+                  ),
+                  const SizedBox(height: 30),
+                  ElevatedButton.icon(
+                    onPressed: _saveProfile,
+                    icon: const Icon(Icons.save),
+                    label: const Text('Save Changes'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.deepPurple,
+                      minimumSize: const Size(double.infinity, 50),
+                    ),
+                  ),
+                ],
+              ),
+            ),
     );
   }
 }

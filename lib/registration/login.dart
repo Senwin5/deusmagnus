@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:deusmagnus/registration/signup_page.dart';
 import 'package:deusmagnus/registration/forgot_password.dart';
+import 'package:deusmagnus/pages/bottom_nav/bottom_nav.dart'; // 👈 Make sure this path is correct
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -20,29 +21,35 @@ class _LoginPageState extends State<LoginPage> {
     setState(() => isLoading = true);
 
     try {
-      UserCredential userCredential = await FirebaseAuth.instance
-          .signInWithEmailAndPassword(
-              email: emailController.text.trim(),
-              password: passwordController.text.trim());
+      // ✅ Sign in user
+      UserCredential userCredential =
+          await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: emailController.text.trim(),
+        password: passwordController.text.trim(),
+      );
 
-      // ✅ Fetch username from Firestore
+      // ✅ Fetch user info from Firestore
       DocumentSnapshot userDoc = await FirebaseFirestore.instance
           .collection("users")
           .doc(userCredential.user!.uid)
           .get();
 
-      String username = userDoc["username"] ?? "User";
+      String fullName = userDoc["fullName"] ?? "User";
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             backgroundColor: Colors.green,
-            content: Text("Welcome back, $username!"),
+            content: Text("Welcome back, $fullName!"),
           ),
         );
-      }
 
-      // Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => HomePage()));
+        // ✅ Navigate to your home page (BottomNav)
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const BottomNav()),
+        );
+      }
     } on FirebaseAuthException catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -111,8 +118,6 @@ class _LoginPageState extends State<LoginPage> {
                 ),
               ),
               const SizedBox(height: 20),
-
-              // ✅ Forgot Password Button
               Align(
                 alignment: Alignment.centerRight,
                 child: TextButton(
@@ -132,7 +137,6 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                 ),
               ),
-
               const SizedBox(height: 20),
               SizedBox(
                 width: double.infinity,
@@ -162,8 +166,6 @@ class _LoginPageState extends State<LoginPage> {
                 ),
               ),
               const SizedBox(height: 20),
-
-              // ✅ "Don't have an account?"
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [

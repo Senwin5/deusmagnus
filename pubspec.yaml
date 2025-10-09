@@ -12,16 +12,16 @@ dependencies:
   flutter:
     sdk: flutter
 
-  # Firebase dependencies
-  firebase_core: ^4.1.1
-  firebase_auth: ^6.1.0
-  cloud_firestore: ^6.0.2
-  firebase_storage: ^12.3.3        # ✅ For uploading profile photos
+  # ✅ Firebase dependencies (all versions compatible)
+  firebase_core: ^3.10.0
+  firebase_auth: ^5.3.1
+  cloud_firestore: ^5.5.1
+  firebase_storage: ^12.3.4
 
-  # Image picker (for selecting images from gallery or camera)
-  image_picker: ^1.1.2             # ✅ For picking profile images
+  # ✅ Image picker for profile photos
+  image_picker: ^1.1.2
 
-  # Other useful packages
+  # ✅ Shared preferences and icons
   shared_preferences: ^2.2.2
   cupertino_icons: ^1.0.8
 
