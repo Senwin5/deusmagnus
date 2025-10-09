@@ -1,76 +1,132 @@
 import 'package:flutter/material.dart';
-import 'package:introduction_screen/introduction_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:deusmagnus/registration/login.dart';
 
-class OnboardingScreen extends StatelessWidget {
+class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
 
-  void _onIntroEnd(context) {
-    Navigator.of(context).pushReplacement(
+  @override
+  State<OnboardingScreen> createState() => _OnboardingScreenState();
+}
+
+class _OnboardingScreenState extends State<OnboardingScreen> {
+  final PageController _pageController = PageController();
+  int currentPage = 0;
+
+  final List<Map<String, String>> pages = [
+    {
+      "title": "Buy Your Dream Home",
+      "subtitle": "Explore and find your perfect property",
+    },
+    {
+      "title": "Invest in Projects",
+      "subtitle": "Discover ongoing and upcoming projects",
+    },
+    {
+      "title": "Manage Properties",
+      "subtitle": "Easily manage your properties in one app",
+    },
+  ];
+
+  void _nextPage() {
+    if (currentPage < pages.length - 1) {
+      _pageController.nextPage(
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeIn,
+      );
+    } else {
+      _finishOnboarding();
+    }
+  }
+
+  Future<void> _finishOnboarding() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('hasSeenOnboarding', true);
+
+    Navigator.pushReplacement(
+      context,
       MaterialPageRoute(builder: (_) => const LoginPage()),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    const pageDecoration = PageDecoration(
-      titleTextStyle: TextStyle(
-        fontSize: 26.0,
-        fontWeight: FontWeight.bold,
-        color: Color(0xff284a79),
+    return Scaffold(
+      body: SafeArea(
+        child: Column(
+          children: [
+            Expanded(
+              child: PageView.builder(
+                controller: _pageController,
+                itemCount: pages.length,
+                onPageChanged: (index) => setState(() => currentPage = index),
+                itemBuilder: (_, index) => Padding(
+                  padding: const EdgeInsets.all(24.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      // Replace with image if needed
+                      const Icon(Icons.home,
+                          size: 120, color: Colors.blueAccent),
+                      const SizedBox(height: 40),
+                      Text(
+                        pages[index]["title"]!,
+                        style: const TextStyle(
+                          fontSize: 28,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 20),
+                      Text(
+                        pages[index]["subtitle"]!,
+                        style:
+                            const TextStyle(fontSize: 18, color: Colors.grey),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: List.generate(
+                pages.length,
+                (index) => Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 5),
+                  width: currentPage == index ? 20 : 10,
+                  height: 10,
+                  decoration: BoxDecoration(
+                    color:
+                        currentPage == index ? Colors.blueAccent : Colors.grey,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  TextButton(
+                    onPressed: _finishOnboarding,
+                    child: const Text("Skip"),
+                  ),
+                  ElevatedButton(
+                    onPressed: _nextPage,
+                    child:
+                        Text(currentPage == pages.length - 1 ? "Done" : "Next"),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 30),
+          ],
+        ),
       ),
-      bodyTextStyle: TextStyle(fontSize: 18.0, color: Colors.black87),
-      bodyPadding: EdgeInsets.symmetric(
-          horizontal: 16.0, vertical: 8.0), // ✅ updated here
-      imagePadding: EdgeInsets.all(24),
-      pageColor: Colors.white,
-    );
-
-    return IntroductionScreen(
-      pages: [
-        PageViewModel(
-          title: "Buy Your Dream Home",
-          body:
-              "Explore premium listings, compare options, and find your ideal property with ease.",
-          image: Image.asset("assets/images/home1.png", height: 250),
-          decoration: pageDecoration,
-        ),
-        PageViewModel(
-          title: "Discover Luxury Properties",
-          body:
-              "Find apartments, villas, and houses that match your lifestyle and budget.",
-          image: Image.asset("assets/images/home2.png", height: 250),
-          decoration: pageDecoration,
-        ),
-        PageViewModel(
-          title: "Start Your Real Estate Journey",
-          body:
-              "Buy, rent, or invest — everything you need is just a tap away with DeusMagnus.",
-          image: Image.asset("assets/images/home3.png", height: 250),
-          decoration: pageDecoration,
-        ),
-      ],
-      onDone: () => _onIntroEnd(context),
-      showSkipButton: true, // ✅ Added skip button
-      skip: const Text("Skip",
-          style: TextStyle(color: Colors.amber, fontWeight: FontWeight.bold)),
-      next: const Icon(Icons.arrow_forward, color: Colors.amber),
-      done: const Text(
-        "Get Started",
-        style: TextStyle(fontWeight: FontWeight.bold, color: Colors.amber),
-      ),
-      dotsDecorator: const DotsDecorator(
-        size: Size(10.0, 10.0),
-        color: Colors.grey,
-        activeColor: Color(0xff284a79),
-        activeSize: Size(22.0, 10.0),
-        activeShape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(25.0)),
-        ),
-      ),
-      curve: Curves.easeInOut,
-      animationDuration: 700, // ✅ smooth transitions
-      globalBackgroundColor: Colors.white,
     );
   }
 }
