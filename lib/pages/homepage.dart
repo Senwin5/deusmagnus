@@ -258,6 +258,7 @@ class _HomepageState extends State<Homepage> {
       width: 100,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
+        // ignore: deprecated_member_use
         color: color.withOpacity(0.1),
         borderRadius: BorderRadius.circular(16),
       ),
@@ -380,6 +381,7 @@ class _HomepageState extends State<Homepage> {
                         end: Alignment.bottomCenter,
                         colors: [
                           Colors.transparent,
+                          // ignore: deprecated_member_use
                           Colors.black.withOpacity(0.6)
                         ]),
                   ),

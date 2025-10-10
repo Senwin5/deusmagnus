@@ -26,16 +26,17 @@ class _SplashScreenState extends State<SplashScreen> {
     await SharedPreferences.getInstance();
 
     // 🔹 Force onboarding for testing
-    bool hasSeenOnboarding = false; // always false during testing
+    bool hasSeenOnboarding = true; // always false during testing
 
     User? user = FirebaseAuth.instance.currentUser;
 
+    // ignore: dead_code
     if (!hasSeenOnboarding) {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (_) => const OnboardingScreen()),
       );
-    // ignore: dead_code
+      // ignore: dead_code
     } else if (user == null) {
       Navigator.pushReplacement(
         context,
