@@ -25,6 +25,9 @@ dependencies:
   # ✅ Shared preferences and icons
   shared_preferences: ^2.2.2
   cupertino_icons: ^1.0.8
+  url_launcher: ^6.3.2
+  font_awesome_flutter: ^10.10.0
+  intl: ^0.20.2
 
 dev_dependencies:
   flutter_test:

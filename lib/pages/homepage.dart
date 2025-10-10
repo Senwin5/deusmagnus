@@ -1,4 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:deusmagnus/pages/projects.dart';
+import 'package:deusmagnus/pages/blog_page.dart';
+import 'package:deusmagnus/pages/services_page.dart';
+import 'package:deusmagnus/pages/about_page.dart';
+import 'package:deusmagnus/pages/contact_page.dart';
 
 class Homepage extends StatefulWidget {
   const Homepage({super.key});
@@ -8,7 +13,6 @@ class Homepage extends StatefulWidget {
 }
 
 class _HomepageState extends State<Homepage> {
-  // Controllers for Hero, Ongoing, and Featured carousels
   final PageController _heroController = PageController(viewportFraction: 0.9);
   final PageController _ongoingController =
       PageController(viewportFraction: 0.8);
@@ -22,22 +26,12 @@ class _HomepageState extends State<Homepage> {
   @override
   void initState() {
     super.initState();
-
-    _heroController.addListener(() {
-      setState(() {
-        _heroPage = _heroController.page!;
-      });
-    });
-    _ongoingController.addListener(() {
-      setState(() {
-        _ongoingPage = _ongoingController.page!;
-      });
-    });
-    _featuredController.addListener(() {
-      setState(() {
-        _featuredPage = _featuredController.page!;
-      });
-    });
+    _heroController.addListener(
+        () => setState(() => _heroPage = _heroController.page ?? 0));
+    _ongoingController.addListener(
+        () => setState(() => _ongoingPage = _ongoingController.page ?? 0));
+    _featuredController.addListener(
+        () => setState(() => _featuredPage = _featuredController.page ?? 0));
   }
 
   @override
@@ -49,9 +43,10 @@ class _HomepageState extends State<Homepage> {
   }
 
   final List<String> heroImages = [
-    "assets/images/deusmagnus.png", // local asset
+    "assets/images/deusmagnus.png",
     "assets/images/house1.png",
     "assets/images/house2.png",
+    "assets/images/house3.png"
   ];
 
   @override
@@ -61,10 +56,8 @@ class _HomepageState extends State<Homepage> {
       appBar: AppBar(
         backgroundColor: const Color(0xff284a79),
         elevation: 0,
-        title: const Text(
-          "DeusMagnus",
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
+        title: const Text("DeusMagnus",
+            style: TextStyle(fontWeight: FontWeight.bold)),
         centerTitle: true,
       ),
       body: Stack(
@@ -82,10 +75,9 @@ class _HomepageState extends State<Homepage> {
                     borderRadius: BorderRadius.circular(12),
                     boxShadow: const [
                       BoxShadow(
-                        color: Colors.black12,
-                        blurRadius: 6,
-                        offset: Offset(0, 3),
-                      ),
+                          color: Colors.black12,
+                          blurRadius: 6,
+                          offset: Offset(0, 3))
                     ],
                   ),
                   child: const TextField(
@@ -98,16 +90,15 @@ class _HomepageState extends State<Homepage> {
                 ),
                 const SizedBox(height: 20),
 
-                // 🌄 Hero banner carousel (local assets)
+                // 🌄 Hero banner
                 SizedBox(
                   height: 200,
                   child: PageView.builder(
                     controller: _heroController,
                     itemCount: heroImages.length,
                     itemBuilder: (context, index) {
-                      double scale = (_heroPage - index).abs() < 1
-                          ? 1 - (_heroPage - index).abs() * 0.1
-                          : 0.9;
+                      double scale =
+                          (1 - (_heroPage - index).abs() * 0.1).clamp(0.9, 1.0);
                       return Transform.scale(
                         scale: scale,
                         child: ClipRRect(
@@ -115,6 +106,11 @@ class _HomepageState extends State<Homepage> {
                           child: Image.asset(
                             heroImages[index],
                             fit: BoxFit.cover,
+                            errorBuilder: (_, __, ___) => Container(
+                              color: Colors.grey[300],
+                              child: const Icon(Icons.image,
+                                  size: 50, color: Colors.grey),
+                            ),
                           ),
                         ),
                       );
@@ -123,11 +119,10 @@ class _HomepageState extends State<Homepage> {
                 ),
                 const SizedBox(height: 20),
 
-                // 🏗 Ongoing Projects (network images)
-                const Text(
-                  "Ongoing Projects",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
+                // 🏗 Ongoing Projects
+                const Text("Ongoing Projects",
+                    style:
+                        TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 12),
                 SizedBox(
                   height: 180,
@@ -135,9 +130,8 @@ class _HomepageState extends State<Homepage> {
                     controller: _ongoingController,
                     itemCount: 3,
                     itemBuilder: (context, index) {
-                      double scale = (_ongoingPage - index).abs() < 1
-                          ? 1 - (_ongoingPage - index).abs() * 0.1
-                          : 0.9;
+                      double scale = (1 - (_ongoingPage - index).abs() * 0.1)
+                          .clamp(0.9, 1.0);
                       return Transform.scale(
                         scale: scale,
                         child: _buildProjectCard(
@@ -163,37 +157,39 @@ class _HomepageState extends State<Homepage> {
                 ),
                 const SizedBox(height: 20),
 
-                // ⚡ Quick actions
-                const Text(
-                  "Quick Actions",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
+                // ⚡ Quick Actions
+                const Text("Quick Actions",
+                    style:
+                        TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 12),
                 SizedBox(
                   height: 100,
                   child: ListView(
                     scrollDirection: Axis.horizontal,
                     children: [
-                      _buildActionCard("Projects", Icons.home, Colors.blue),
+                      _buildActionCard("Projects", Icons.home, Colors.blue,
+                          const Projects()),
                       const SizedBox(width: 12),
-                      _buildActionCard("Workers", Icons.groups, Colors.green),
+                      _buildActionCard("Services", Icons.build, Colors.teal,
+                          const Services()),
+                      const SizedBox(width: 12),
+                      _buildActionCard("Blog", Icons.groups, Colors.green,
+                          const BlogPage()),
                       const SizedBox(width: 12),
                       _buildActionCard(
-                          "Services", Icons.real_estate_agent, Colors.teal),
+                          "About", Icons.info, Colors.orange, const About()),
                       const SizedBox(width: 12),
-                      _buildActionCard("About", Icons.info, Colors.orange),
-                      const SizedBox(width: 12),
-                      _buildActionCard("Contact", Icons.phone, Colors.purple),
+                      _buildActionCard("Contact", Icons.phone, Colors.purple,
+                          const Contact()),
                     ],
                   ),
                 ),
                 const SizedBox(height: 20),
 
-                // 🌟 Featured Properties (network images)
-                const Text(
-                  "Featured Properties",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
+                // 🌟 Featured Properties
+                const Text("Featured Properties",
+                    style:
+                        TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 12),
                 SizedBox(
                   height: 280,
@@ -201,9 +197,8 @@ class _HomepageState extends State<Homepage> {
                     controller: _featuredController,
                     itemCount: 3,
                     itemBuilder: (context, index) {
-                      double scale = (_featuredPage - index).abs() < 1
-                          ? 1 - (_featuredPage - index).abs() * 0.1
-                          : 0.9;
+                      double scale = (1 - (_featuredPage - index).abs() * 0.1)
+                          .clamp(0.9, 1.0);
                       return Transform.scale(
                         scale: scale,
                         child: _buildFeaturedPropertyCard(
@@ -242,7 +237,8 @@ class _HomepageState extends State<Homepage> {
             bottom: 20,
             right: 20,
             child: FloatingActionButton.extended(
-              onPressed: () {},
+              onPressed: () => Navigator.push(
+                  context, MaterialPageRoute(builder: (_) => const Projects())),
               backgroundColor: const Color(0xff284a79),
               label: const Text("Explore Projects"),
               icon: const Icon(Icons.explore),
@@ -253,22 +249,27 @@ class _HomepageState extends State<Homepage> {
     );
   }
 
-  Widget _buildActionCard(String title, IconData icon, Color color) {
-    return Container(
-      width: 100,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        // ignore: deprecated_member_use
-        color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Column(
-        children: [
-          Icon(icon, color: color, size: 32),
-          const SizedBox(height: 10),
-          Text(title,
-              style: TextStyle(color: color, fontWeight: FontWeight.w600)),
-        ],
+  Widget _buildActionCard(
+      String title, IconData icon, Color color, Widget page) {
+    return GestureDetector(
+      onTap: () =>
+          Navigator.push(context, MaterialPageRoute(builder: (_) => page)),
+      child: Container(
+        width: 100,
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          // ignore: deprecated_member_use
+          color: color.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Column(
+          children: [
+            Icon(icon, color: color, size: 32),
+            const SizedBox(height: 10),
+            Text(title,
+                style: TextStyle(color: color, fontWeight: FontWeight.w600)),
+          ],
+        ),
       ),
     );
   }
@@ -287,7 +288,7 @@ class _HomepageState extends State<Homepage> {
         borderRadius: BorderRadius.circular(16),
         color: Colors.white,
         boxShadow: const [
-          BoxShadow(color: Colors.black12, blurRadius: 6, offset: Offset(0, 3)),
+          BoxShadow(color: Colors.black12, blurRadius: 6, offset: Offset(0, 3))
         ],
       ),
       child: Column(
@@ -301,13 +302,11 @@ class _HomepageState extends State<Homepage> {
               height: 100,
               width: double.infinity,
               fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) {
-                return Container(
-                  height: 100,
-                  color: Colors.grey[300],
-                  child: const Icon(Icons.image, size: 50, color: Colors.grey),
-                );
-              },
+              errorBuilder: (_, __, ___) => Container(
+                height: 100,
+                color: Colors.grey[300],
+                child: const Icon(Icons.image, size: 50, color: Colors.grey),
+              ),
             ),
           ),
           Padding(
@@ -345,49 +344,20 @@ class _HomepageState extends State<Homepage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Stack(
-            children: [
-              ClipRRect(
-                borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(16),
-                    topRight: Radius.circular(16)),
-                child: Image.network(
-                  imageUrl,
-                  height: 140,
-                  width: double.infinity,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) {
-                    return Container(
-                      height: 140,
-                      color: Colors.grey[300],
-                      child:
-                          const Icon(Icons.image, size: 50, color: Colors.grey),
-                    );
-                  },
-                ),
+          ClipRRect(
+            borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(16), topRight: Radius.circular(16)),
+            child: Image.network(
+              imageUrl,
+              height: 140,
+              width: double.infinity,
+              fit: BoxFit.cover,
+              errorBuilder: (_, __, ___) => Container(
+                height: 140,
+                color: Colors.grey[300],
+                child: const Icon(Icons.image, size: 50, color: Colors.grey),
               ),
-              Positioned(
-                bottom: 0,
-                left: 0,
-                right: 0,
-                height: 50,
-                child: Container(
-                  decoration: BoxDecoration(
-                    borderRadius: const BorderRadius.only(
-                        bottomLeft: Radius.circular(16),
-                        bottomRight: Radius.circular(16)),
-                    gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          Colors.transparent,
-                          // ignore: deprecated_member_use
-                          Colors.black.withOpacity(0.6)
-                        ]),
-                  ),
-                ),
-              ),
-            ],
+            ),
           ),
           Padding(
             padding: const EdgeInsets.all(12),
