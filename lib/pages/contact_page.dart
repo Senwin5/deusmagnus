@@ -25,12 +25,12 @@ class _ContactPageState extends State<Contact>
 
     _animationController = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 1),
+      duration: const Duration(milliseconds: 800),
     );
 
     _fadeInAnimation = CurvedAnimation(
       parent: _animationController,
-      curve: Curves.easeIn,
+      curve: Curves.easeInOut,
     );
 
     _animationController.forward();
@@ -45,12 +45,16 @@ class _ContactPageState extends State<Contact>
     super.dispose();
   }
 
-  Future<void> _launchEmail() async {
+  Future<void> _launchEmail(String name, String email, String message) async {
     final Uri emailLaunchUri = Uri(
       scheme: 'mailto',
-      path: 'info@deusmagnus.com',
-      query: Uri.encodeFull('subject=Contact from Deus Magnus App'),
+      path: 'godwin@deusmagnus.com',
+      query: Uri.encodeFull(
+        'subject=Contact from Deus Magnus App'
+        '&body=Name: $name\nEmail: $email\n\nMessage:\n$message',
+      ),
     );
+
     if (await canLaunchUrl(emailLaunchUri)) {
       await launchUrl(emailLaunchUri);
     } else {
@@ -80,16 +84,24 @@ class _ContactPageState extends State<Contact>
           child: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  "Send Us a Message",
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                const Center(
+                  child: Text(
+                    "Get in Touch",
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                    ),
+                  ),
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 25),
                 TextFormField(
                   controller: _nameController,
                   decoration: const InputDecoration(
                     labelText: "Your Name",
+                    prefixIcon: Icon(Icons.person_outline),
                     border: OutlineInputBorder(),
                   ),
                   validator: (value) =>
@@ -100,6 +112,7 @@ class _ContactPageState extends State<Contact>
                   controller: _emailController,
                   decoration: const InputDecoration(
                     labelText: "Your Email",
+                    prefixIcon: Icon(Icons.email_outlined),
                     border: OutlineInputBorder(),
                   ),
                   validator: (value) => value == null || !value.contains('@')
@@ -111,6 +124,7 @@ class _ContactPageState extends State<Contact>
                   controller: _messageController,
                   decoration: const InputDecoration(
                     labelText: "Message",
+                    prefixIcon: Icon(Icons.message_outlined),
                     border: OutlineInputBorder(),
                   ),
                   maxLines: 5,
@@ -118,22 +132,33 @@ class _ContactPageState extends State<Contact>
                       value == null || value.isEmpty ? "Enter a message" : null,
                 ),
                 const SizedBox(height: 20),
-                ElevatedButton.icon(
-                  onPressed: () {
-                    if (_formKey.currentState!.validate()) {
-                      Navigator.pop(context);
-                      _launchEmail();
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text("Opening email app...")),
-                      );
-                    }
-                  },
-                  icon: const Icon(Icons.send),
-                  label: const Text("Send"),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blueAccent,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    onPressed: () {
+                      if (_formKey.currentState!.validate()) {
+                        final name = _nameController.text.trim();
+                        final email = _emailController.text.trim();
+                        final message = _messageController.text.trim();
+
+                        Navigator.pop(context);
+                        _launchEmail(name, email, message);
+
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                              content: Text("Opening your email app...")),
+                        );
+                      }
+                    },
+                    icon: const Icon(Icons.send),
+                    label: const Text("Send Message"),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blueAccent,
+                      padding: const EdgeInsets.symmetric(vertical: 15),
+                      textStyle: const TextStyle(fontSize: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
                     ),
                   ),
                 ),
@@ -155,32 +180,29 @@ class _ContactPageState extends State<Contact>
           title: const Text("Contact Us"),
           centerTitle: true,
           backgroundColor: Colors.blueAccent,
+          elevation: 4,
         ),
         floatingActionButton: FloatingActionButton.extended(
           onPressed: _showContactForm,
-          label: const Text("Contact Us"),
-          icon: const Icon(Icons.chat),
+          label: const Text("Send Message"),
+          icon: const Icon(Icons.chat_bubble_outline),
           backgroundColor: Colors.blueAccent,
         ),
         body: ListView(
           padding: const EdgeInsets.all(20),
           children: [
-            Container(
-              height: 180,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(12),
-                image: DecorationImage(
-                  image: NetworkImage(
-                      Image.asset('assets/images/house1.png', fit: BoxFit.cover)
-                          as String),
-                  fit: BoxFit.cover,
-                ),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: Image.asset(
+                'assets/images/house1.png',
+                height: 200,
+                fit: BoxFit.cover,
               ),
             ),
             const SizedBox(height: 20),
             const Text(
               "Our Office",
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 10),
             const ListTile(
@@ -194,14 +216,13 @@ class _ContactPageState extends State<Contact>
             ),
             ListTile(
               leading: const Icon(Icons.email, color: Colors.blueAccent),
-              title: const Text("info@deusmagnus.com"),
-              onTap: _launchEmail,
+              title: const Text("godwin@deusmagnus.com"),
+              onTap: () => _launchEmail("", "", ""),
             ),
-            const Divider(),
-            const SizedBox(height: 10),
+            const Divider(height: 40),
             const Text(
-              "We’d love to hear from you! Reach out with your questions, feedback, or partnership opportunities.",
-              style: TextStyle(fontSize: 16),
+              "We’d love to hear from you! Whether you have questions, feedback, or partnership inquiries, we’re here to help.",
+              style: TextStyle(fontSize: 16, height: 1.5),
             ),
             const SizedBox(height: 40),
           ],
