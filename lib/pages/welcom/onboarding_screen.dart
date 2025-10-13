@@ -34,7 +34,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   Future<void> _completeOnboarding() async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('hasSeenOnboarding', false);
+    await prefs.setBool('hasSeenOnboarding',false);
 
     Navigator.pushReplacement(
       context,
