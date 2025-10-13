@@ -1,7 +1,6 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:http/http.dart' as http;
+import 'package:url_launcher/url_launcher.dart';
 import '../map/full_map_view.dart';
 
 class OngoingProjectsDetails extends StatefulWidget {
@@ -14,8 +13,6 @@ class OngoingProjectsDetails extends StatefulWidget {
 }
 
 class _OngoingProjectsDetailsState extends State<OngoingProjectsDetails> {
-  bool _isSending = false; // Loading state
-
   @override
   Widget build(BuildContext context) {
     final double progress = (widget.project["progress"] is num)
@@ -171,7 +168,7 @@ class _OngoingProjectsDetailsState extends State<OngoingProjectsDetails> {
     );
   }
 
-  // 🔹 Enquiry Form
+  // 🔹 Enquiry Form with Gmail auto-close
   void _showEnquiryForm(BuildContext context) {
     final _nameController = TextEditingController();
     final _emailController = TextEditingController();
@@ -190,180 +187,106 @@ class _OngoingProjectsDetailsState extends State<OngoingProjectsDetails> {
           right: 16,
           top: 24,
         ),
-        child: StatefulBuilder(builder: (context, setStateSheet) {
-          return Form(
-            key: _formKey,
-            child: Wrap(
-              children: [
-                Center(
-                  child: Container(
-                    width: 50,
-                    height: 5,
-                    decoration: BoxDecoration(
-                      color: Colors.grey[400],
-                      borderRadius: BorderRadius.circular(10),
-                    ),
+        child: Form(
+          key: _formKey,
+          child: Wrap(
+            children: [
+              Center(
+                child: Container(
+                  width: 50,
+                  height: 5,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[400],
+                    borderRadius: BorderRadius.circular(10),
                   ),
                 ),
-                const SizedBox(height: 20),
-                const Text(
-                  "Project Booking / Enquiry",
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 20),
+              const Text(
+                "Project Booking / Enquiry",
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 20),
+              TextFormField(
+                controller: _nameController,
+                decoration: const InputDecoration(
+                  labelText: "Your Name",
+                  border: OutlineInputBorder(),
                 ),
-                const SizedBox(height: 20),
-                TextFormField(
-                  controller: _nameController,
-                  decoration: const InputDecoration(
-                    labelText: "Your Name",
-                    border: OutlineInputBorder(),
-                  ),
-                  validator: (value) =>
-                      value == null || value.isEmpty ? "Enter your name" : null,
+                validator: (value) =>
+                    value == null || value.isEmpty ? "Enter your name" : null,
+              ),
+              const SizedBox(height: 12),
+              TextFormField(
+                controller: _emailController,
+                keyboardType: TextInputType.emailAddress,
+                decoration: const InputDecoration(
+                  labelText: "Email Address",
+                  border: OutlineInputBorder(),
                 ),
-                const SizedBox(height: 12),
-                TextFormField(
-                  controller: _emailController,
-                  keyboardType: TextInputType.emailAddress,
-                  decoration: const InputDecoration(
-                    labelText: "Email Address",
-                    border: OutlineInputBorder(),
+                validator: (value) {
+                  if (value == null || value.isEmpty) return "Enter your email";
+                  final emailRegex = RegExp(
+                      r"^[a-zA-Z0-9._%-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$");
+                  if (!emailRegex.hasMatch(value)) return "Enter a valid email";
+                  return null;
+                },
+              ),
+              const SizedBox(height: 12),
+              TextFormField(
+                controller: _messageController,
+                maxLines: 4,
+                decoration: const InputDecoration(
+                  labelText: "Message / Booking Details",
+                  border: OutlineInputBorder(),
+                ),
+                validator: (value) =>
+                    value == null || value.isEmpty ? "Enter a message" : null,
+              ),
+              const SizedBox(height: 30),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xff284a79),
+                    padding: const EdgeInsets.symmetric(vertical: 14),
                   ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty)
-                      return "Enter your email";
-                    final emailRegex = RegExp(
-                        r"^[a-zA-Z0-9._%-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$");
-                    if (!emailRegex.hasMatch(value))
-                      return "Enter a valid email";
-                    return null;
+                  icon: const Icon(Icons.send),
+                  label: const Text(
+                    "Send Enquiry",
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                  onPressed: () {
+                    if (!_formKey.currentState!.validate()) return;
+
+                    final name = _nameController.text.trim();
+                    final email = _emailController.text.trim();
+                    final message = _messageController.text.trim();
+                    final projectTitle = widget.project['title'] ?? '';
+
+                    // 🔹 Auto-close modal first
+                    Navigator.pop(context);
+
+                    // 🔹 Open Gmail / default email app
+                    final mailtoUri = Uri(
+                      scheme: 'mailto',
+                      path: 'godwin@deusmagnus.com',
+                      queryParameters: {
+                        'subject': 'Enquiry: $projectTitle',
+                        'body':
+                            'Name: $name\nEmail: $email\nMessage:\n$message',
+                      },
+                    );
+
+                    launchUrl(mailtoUri);
                   },
                 ),
-                const SizedBox(height: 12),
-                TextFormField(
-                  controller: _messageController,
-                  maxLines: 4,
-                  decoration: const InputDecoration(
-                    labelText: "Message / Booking Details",
-                    border: OutlineInputBorder(),
-                  ),
-                  validator: (value) =>
-                      value == null || value.isEmpty ? "Enter a message" : null,
-                ),
-                const SizedBox(height: 30),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton.icon(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xff284a79),
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                    ),
-                    icon: _isSending
-                        ? const SizedBox(
-                            height: 20,
-                            width: 20,
-                            child: CircularProgressIndicator(
-                              color: Colors.white,
-                              strokeWidth: 2,
-                            ),
-                          )
-                        : const Icon(Icons.send),
-                    label: Text(
-                      _isSending ? "Sending..." : "Send Enquiry",
-                      style: const TextStyle(
-                          fontSize: 16, fontWeight: FontWeight.bold),
-                    ),
-                    onPressed: _isSending
-                        ? null
-                        : () async {
-                            if (!_formKey.currentState!.validate()) return;
-
-                            final name = _nameController.text.trim();
-                            final email = _emailController.text.trim();
-                            final message = _messageController.text.trim();
-
-                            setStateSheet(() => _isSending = true);
-
-                            try {
-                              // Main enquiry email
-                              await _sendEmail(
-                                serviceId: 'service_e91t79e',
-                                templateId: 'template_contact',
-                                publicKey: '0RgNLYHg0-4S3sO57',
-                                templateParams: {
-                                  'from_name': name,
-                                  'from_email': email,
-                                  'message': message,
-                                  'project_title':
-                                      widget.project['title'] ?? '',
-                                  'to_email': 'info@deusmagnus.com',
-                                },
-                              );
-
-                              // Auto-reply email
-                              await _sendEmail(
-                                serviceId: 'service_e91t79e',
-                                templateId: 'template_j1ersug',
-                                publicKey: '0RgNLYHg0-4S3sO57',
-                                templateParams: {
-                                  'email': email,
-                                  'name': name,
-                                },
-                              );
-
-                              Navigator.pop(context); // close form
-
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text(
-                                      "Your enquiry has been sent successfully!"),
-                                  backgroundColor: Colors.green,
-                                ),
-                              );
-                            } catch (e) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text("Failed to send enquiry: $e"),
-                                  backgroundColor: Colors.red,
-                                ),
-                              );
-                            } finally {
-                              setStateSheet(() => _isSending = false);
-                            }
-                          },
-                  ),
-                ),
-                const SizedBox(height: 20),
-              ],
-            ),
-          );
-        }),
+              ),
+              const SizedBox(height: 20),
+            ],
+          ),
+        ),
       ),
     );
-  }
-
-  Future<void> _sendEmail({
-    required String serviceId,
-    required String templateId,
-    required String publicKey,
-    required Map<String, dynamic> templateParams,
-  }) async {
-    final url = Uri.parse('https://api.emailjs.com/api/v1.0/email/send');
-    final response = await http.post(
-      url,
-      headers: {
-        'origin': 'http://localhost',
-        'Content-Type': 'application/json',
-      },
-      body: json.encode({
-        'service_id': serviceId,
-        'template_id': templateId,
-        'user_id': publicKey,
-        'template_params': templateParams,
-      }),
-    );
-
-    if (response.statusCode != 200) {
-      throw Exception('Email send failed: ${response.body}');
-    }
   }
 }
