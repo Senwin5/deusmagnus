@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:deusmagnus/pages/details/ongoing_projects_details.dart';
+import 'package:deusmagnus/pages/details/featured_property_details.dart';
 import 'package:deusmagnus/pages/projects.dart';
 import 'package:deusmagnus/pages/blog_page.dart';
 import 'package:deusmagnus/pages/services_page.dart';
@@ -70,7 +71,7 @@ class _HomepageState extends State<Homepage> {
     super.dispose();
   }
 
-  // 🔹 Updated ongoing projects with progress + coordinates
+  // 🔹 Ongoing projects
   final List<Map<String, dynamic>> ongoingProjects = [
     {
       "title": "Mowe Warehouse",
@@ -96,29 +97,29 @@ class _HomepageState extends State<Homepage> {
       "latitude": 6.459964,
       "longitude": 3.601521,
     },
+  ];
+
+  // 🔹 Featured properties
+  final List<Map<String, dynamic>> featuredProperties = [
     {
-      "title": "Abuja Office Complex",
-      "status": "Completed",
-      "image": "https://www.deusmagnus.com/media/images_sub/a3.jpg",
-      "client": "TechFront HQ",
-      "location": "Central Business District, Abuja",
+      "title": "Luxury Villa",
+      "location": "Lagos",
+      "price": "\$450,000",
+      "image": "https://images.unsplash.com/photo-1599423300746-b62533397364",
       "description":
-          "A state-of-the-art corporate office space with eco-friendly features and a rooftop terrace.",
-      "progress": 100,
-      "latitude": 9.05785,
-      "longitude": 7.49508,
+          "A luxurious villa with modern amenities, pool, and large garden.",
+      "latitude": 6.5244,
+      "longitude": 3.3792,
     },
     {
-      "title": "Corporate Complex",
-      "status": "Incompleted",
-      "image": "https://www.deusmagnus.com/media/images_sub/RED_2_-_Photo.jpg",
-      "client": "TechFront HQ",
-      "location": "Victoria Island, Lagos",
+      "title": "Modern Apartment",
+      "location": "Abuja",
+      "price": "\$320,000",
+      "image": "https://images.unsplash.com/photo-1572120360610-d971b9b63938",
       "description":
-          "A premium office complex with integrated solar solutions and high-speed fiber connectivity.",
-      "progress": 45,
-      "latitude": 6.428055,
-      "longitude": 3.421944,
+          "A stylish apartment with city view, gym access, and balcony.",
+      "latitude": 9.05785,
+      "longitude": 7.49508,
     },
   ];
 
@@ -232,19 +233,51 @@ class _HomepageState extends State<Homepage> {
           final project = ongoingProjects[index];
           double scale =
               (1 - (_ongoingPage - index).abs() * 0.1).clamp(0.9, 1.0);
-          return GestureDetector(
-            onTap: () => Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => OngoingProjectsDetails(project: project),
+          return Transform.scale(
+            scale: scale,
+            child: GestureDetector(
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (_) => OngoingProjectsDetails(project: project)),
               ),
-            ),
-            child: Transform.scale(
-              scale: scale,
               child: _buildProjectCard(
                 project["title"],
                 project["status"],
                 project["image"],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  // 🌟 Featured Properties Section
+  Widget _buildFeaturedProjects() {
+    return SizedBox(
+      height: 280,
+      child: PageView.builder(
+        controller: _featuredController,
+        itemCount: featuredProperties.length,
+        itemBuilder: (context, index) {
+          final property = featuredProperties[index];
+          double scale =
+              (1 - (_featuredPage - index).abs() * 0.1).clamp(0.9, 1.0);
+          return Transform.scale(
+            scale: scale,
+            child: GestureDetector(
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (_) =>
+                        FeaturedPropertyDetails(property: property)),
+              ),
+              child: _buildFeaturedPropertyCard(
+                property["title"],
+                property["location"],
+                property["price"],
+                property["image"],
               ),
             ),
           );
@@ -287,46 +320,6 @@ class _HomepageState extends State<Homepage> {
     );
   }
 
-  // 🌟 Featured Properties Section
-  Widget _buildFeaturedProjects() {
-    return SizedBox(
-      height: 280,
-      child: PageView.builder(
-        controller: _featuredController,
-        itemCount: 3,
-        itemBuilder: (context, index) {
-          double scale =
-              (1 - (_featuredPage - index).abs() * 0.1).clamp(0.9, 1.0);
-          return Transform.scale(
-            scale: scale,
-            child: _buildFeaturedPropertyCard(
-              index == 0
-                  ? "Luxury Villa"
-                  : index == 1
-                      ? "Modern Apartment"
-                      : "Beach House",
-              index == 0
-                  ? "Lagos"
-                  : index == 1
-                      ? "Abuja"
-                      : "Lekki",
-              index == 0
-                  ? "\$450,000"
-                  : index == 1
-                      ? "\$320,000"
-                      : "\$780,000",
-              index == 0
-                  ? "https://images.unsplash.com/photo-1599423300746-b62533397364"
-                  : index == 1
-                      ? "https://images.unsplash.com/photo-1572120360610-d971b9b63938"
-                      : "https://images.unsplash.com/photo-1600585154340-be6161a56a0c",
-            ),
-          );
-        },
-      ),
-    );
-  }
-
   // 🧩 Helper Widgets
   Widget _buildActionCard(
       String title, IconData icon, Color color, Widget page) {
@@ -337,7 +330,6 @@ class _HomepageState extends State<Homepage> {
         width: 100,
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          // ignore: deprecated_member_use
           color: color.withOpacity(0.1),
           borderRadius: BorderRadius.circular(16),
         ),
